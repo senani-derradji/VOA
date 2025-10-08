@@ -1,0 +1,89 @@
+# ---------------------------
+# 🐍 Python & FastAPI
+# ---------------------------
+
+# Virtual environment
+sma-env/
+venv/
+env/
+.venv/
+env.yaml
+
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+db_test.py
+
+# SQLite or local databases
+*.db
+*.sqlite3
+backend/SMA.db
+
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# VS Code & IDE settings
+.vscode/
+.idea/
+*.code-workspace
+
+# Log files
+*.log
+logs/
+*.out
+
+# Build / distribution folders
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Temporary or backup files
+*.bak
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---------------------------
+# 🧠 Frontend (if using static HTML/JS)
+# ---------------------------
+# Node.js / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Frontend build artifacts
+app/static/build/
+app/static/dist/
+*.map
+
+# ---------------------------
+# 🧰 Certificates (if any)
+# ---------------------------
+certs/
+*.pem
+*.crt
+*.key
+
+# ---------------------------
+# 🚀 Deployment / Docker
+# ---------------------------
+.dockerignore
+Dockerfile
+docker-compose.yml
+*.pid
+
+# ---------------------------
+# 📦 Other configs
+# ---------------------------
+__MACOSX/
+blocked_ips.log

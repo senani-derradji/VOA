@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secrets Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d0d2b;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            overflow: auto;
+            position: relative;
+            color: white;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: block;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Login Styles */
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            margin: 100px auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .login-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            background: rgba(45, 45, 65, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            color: #e0e0e0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .create-secret-form {
+            background: rgba(60, 60, 80, 0.8);
+            padding: 25px;
+            border-radius: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .create-btn {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Load Secrets Button */
+        .load-secrets-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .load-secrets-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Secrets Table */
+        .secrets-table {
+            width: 100%;
+            background: rgba(60, 60, 80, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            color: #e0e0e0;
+        }
+
+        .secrets-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .secrets-table th {
+            background: rgba(70, 70, 90, 0.9);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 2px solid #555;
+        }
+
+        .secrets-table td {
+            padding: 15px;
+            border-bottom: 1px solid #555;
+            color: #e0e0e0;
+        }
+
+        .secrets-table tr:hover {
+            background: rgba(80, 80, 100, 0.6);
+        }
+
+        .secret-value {
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .update-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .reveal-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #e0e0e0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Role Badge */
+        .role-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .create-secret-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+            }
+        }
+
+        /* Environment Selector */
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        /* Filter and Search */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 10px 15px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .filter-section input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars"></canvas>
+
+    <div class="container">
+        <!-- Login View -->
+        <div id="login-view">
+            <div class="login-container">
+                <h2><i class="fas fa-lock"></i> Secrets Manager</h2>
+                <p class="login-subtitle">Secure your application secrets</p>
+                
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Username" value="admin">
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" value="admin">
+                </div>
+                
+                <button class="btn" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                
+                <div id="login-msg" class="message"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <div class="dashboard">
+                <div class="header">
+                    <div>
+                        <h1><i class="fas fa-lock"></i> Secrets Dashboard</h1>
+                        <p>Manage your application secrets securely</p>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div id="user-display">Welcome!</div>
+                            <div id="user-role" class="role-badge"></div>
+                        </div>
+                        <button class="logout-btn" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <!-- Create Secret Section -->
+                    <div class="section">
+                        <h3><i class="fas fa-plus-circle"></i> Create New Secret</h3>
+                        <div class="create-secret-form">
+                            <div class="form-group">
+                                <input type="text" id="secret-name" placeholder="Secret Name">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="secret-value" placeholder="Secret Value">
+                            </div>
+                            <div class="form-group">
+                                <select id="secret-env">
+                                    <option value="development">Development</option>
+                                    <option value="staging">Staging</option>
+                                    <option value="production">Production</option>
+                                </select>
+                            </div>
+                            <button class="create-btn" id="create-btn">
+                                <i class="fas fa-plus"></i> Create Secret
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Secrets List Section -->
+                    <div class="section">
+                        <h3><i class="fas fa-list"></i> Your Secrets</h3>
+                        
+                        <!-- Filter and Search Section -->
+                        <div class="filter-section">
+                            <button class="load-secrets-btn" id="load-secrets-btn">
+                                <i class="fas fa-sync-alt"></i> Load All Secrets
+                            </button>
+                            <select id="env-filter">
+                                <option value="all">All Environments</option>
+                                <option value="development">Development</option>
+                                <option value="staging">Staging</option>
+                                <option value="production">Production</option>
+                            </select>
+                            <input type="text" id="search-secrets" placeholder="Search secrets...">
+                            <button class="action-btn" id="clear-search" style="background: #6c757d; color: white;">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                        
+                        <div class="secrets-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Environment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="secrets-table-body">
+                                    <!-- Secrets will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="loading-secrets" class="loading hidden">
+                            <div class="spinner"></div>
+                            <p>Loading secrets...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Starry Background Animation
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createStars(count) {
+            stars = [];
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    dx: (Math.random() - 0.5) * 0.8,
+                    dy: (Math.random() - 0.5) * 0.8,
+                    brightness: Math.random() * 0.5 + 0.5
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
+                ctx.fill();
+
+                // Move star
+                star.x += star.dx;
+                star.y += star.dy;
+
+                // Wrap around edges
+                if (star.x < 0) star.x = canvas.width;
+                if (star.x > canvas.width) star.x = 0;
+                if (star.y < 0) star.y = canvas.height;
+                if (star.y > canvas.height) star.y = 0;
+
+                // Twinkle effect
+                star.brightness += (Math.random() - 0.5) * 0.1;
+                star.brightness = Math.max(0.3, Math.min(1, star.brightness));
+            });
+        }
+
+        function animate() {
+            drawStars();
+            requestAnimationFrame(animate);
+        }
+
+        createStars(300);
+        animate();
+
+        // Secrets Manager Application Logic
+        const API_BASE = "http://127.0.0.1:8000/api/v1";
+        let token = "";
+        let currentUser = null;
+
+        // Switch Views
+        function showDashboard() {
+            document.getElementById("login-view").classList.add("hidden");
+            document.getElementById("dashboard-view").classList.remove("hidden");
+        }
+
+        function showLogin() {
+            document.getElementById("login-view").classList.remove("hidden");
+            document.getElementById("dashboard-view").classList.add("hidden");
+        }
+
+        // Login
+        document.getElementById("login-btn").addEventListener("click", async () => {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const loginMsg = document.getElementById("login-msg");
+            const loginBtn = document.getElementById("login-btn");
+
+            // Show loading state
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+            loginBtn.disabled = true;
+
+            try {
+                const form = new URLSearchParams();
+                form.append("username", username);
+                form.append("password", password);
+
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: form
+                });
+
+                const data = await res.json();
+                
+                if (res.ok) {
+                    token = data.access_token;
+                    currentUser = username;
+                    
+                    // Extract user role from token
+                    try {
+                        const tokenParts = token.split('.');
+                        const payload = JSON.parse(atob(tokenParts[1]));
+                        const userRole = payload.role || 'developer';
+                        
+                        document.getElementById("user-display").textContent = `Welcome, ${username}!`;
+                        document.getElementById("user-role").textContent = userRole;
+                    } catch (e) {
+                        document.getElementById("user-display").textContent = `Welcome, ${username}!`;
+                        document.getElementById("user-role").textContent = 'user';
+                    }
+
+                    loginMsg.textContent = "✅ Login successful!";
+                    loginMsg.className = "message success";
+                    
+                    showDashboard();
+                    // Auto-load secrets after a short delay
+                    setTimeout(loadSecrets, 1000);
+                } else {
+                    loginMsg.textContent = "❌ " + (data.detail || "Login failed");
+                    loginMsg.className = "message error";
+                }
+            } catch (error) {
+                loginMsg.textContent = "❌ Network error - check if backend is running";
+                loginMsg.className = "message error";
+            } finally {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Logout
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            token = "";
+            currentUser = null;
+            showLogin();
+            
+            const loginMsg = document.getElementById("login-msg");
+            loginMsg.textContent = "👋 Logged out successfully";
+            loginMsg.className = "message success";
+        });
+
+        // Load Secrets Button
+        document.getElementById("load-secrets-btn").addEventListener("click", loadSecrets);
+
+        // Filter functionality
+        document.getElementById("env-filter").addEventListener("change", applyFilters);
+        document.getElementById("search-secrets").addEventListener("input", applyFilters);
+        document.getElementById("clear-search").addEventListener("click", clearFilters);
+
+        function applyFilters() {
+            const envFilter = document.getElementById("env-filter").value;
+            const searchTerm = document.getElementById("search-secrets").value.toLowerCase();
+            const rows = document.querySelectorAll("#secrets-table-body tr");
+            
+            rows.forEach(row => {
+                const envCell = row.querySelector("td:nth-child(3) .secret-value");
+                const nameCell = row.querySelector("td:nth-child(2) strong");
+                
+                const envMatch = envFilter === "all" || (envCell && envCell.textContent === envFilter);
+                const nameMatch = !searchTerm || (nameCell && nameCell.textContent.toLowerCase().includes(searchTerm));
+                
+                row.style.display = envMatch && nameMatch ? "" : "none";
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById("env-filter").value = "all";
+            document.getElementById("search-secrets").value = "";
+            applyFilters();
+        }
+
+        // Load Secrets
+        async function loadSecrets() {
+            const tbody = document.querySelector("#secrets-table-body");
+            const loading = document.getElementById("loading-secrets");
+            const loadBtn = document.getElementById("load-secrets-btn");
+            
+            tbody.innerHTML = "";
+            loading.classList.remove("hidden");
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+            try {
+                const res = await fetch(`${API_BASE}/secrets`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                }
+
+                const secrets = await res.json();
+                
+                tbody.innerHTML = "";
+
+                if (secrets.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #e0e0e0; padding: 40px;">
+                                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                No secrets found in the database.<br>
+                                <small>Create secrets using the form above.</small>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    secrets.forEach(secret => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${secret.id}</td>
+                            <td><strong>${secret.name}</strong></td>
+                            <td><span class="secret-value">${secret.env || 'development'}</span></td>
+                            <td>
+                                <button class="action-btn update-btn" onclick="updateSecret(${secret.id})">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteSecret(${secret.id})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                                <button class="action-btn reveal-btn" onclick="revealSecret(${secret.id}, this)">
+                                    <i class="fas fa-eye"></i> Reveal
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading secrets:", error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #dc3545; padding: 20px;">
+                            <i class="fas fa-exclamation-triangle"></i> ${error.message}
+                            <br><small>Check console for details</small>
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                loading.classList.add("hidden");
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Load All Secrets';
+            }
+        }
+
+        // Create Secret
+        document.getElementById("create-btn").addEventListener("click", async () => {
+            const name = document.getElementById("secret-name").value;
+            const value = document.getElementById("secret-value").value;
+            const env = document.getElementById("secret-env").value;
+            const createBtn = document.getElementById("create-btn");
+
+            if (!name || !value) {
+                alert("Please fill in both name and value");
+                return;
+            }
+
+            // Show loading state
+            createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            createBtn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/secrets/create?name=${encodeURIComponent(name)}&value=${encodeURIComponent(value)}&env=${encodeURIComponent(env)}`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    // Clear form
+                    document.getElementById("secret-name").value = "";
+                    document.getElementById("secret-value").value = "";
+                    
+                    // Reload secrets
+                    loadSecrets();
+                    
+                    // Show success message
+                    showTempMessage('✅ Secret created successfully!', 'success');
+                } else {
+                    const errorData = await res.json();
+                    alert("Error creating secret: " + (errorData.detail || "Unknown error"));
+                }
+            } catch (error) {
+                alert("Network error: " + error.message);
+            } finally {
+                createBtn.innerHTML = '<i class="fas fa-plus"></i> Create Secret';
+                createBtn.disabled = false;
+            }
+        });
+
+        // Update Secret
+        async function updateSecret(id) {
+            const value = prompt("Enter new secret value:");
+            if (!value) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/secrets/${id}?value=${encodeURIComponent(value)}`, {
+                    method: "PUT",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    loadSecrets();
+                    showTempMessage('✅ Secret updated successfully!', 'success');
+                } else {
+                    alert("Error updating secret");
+                }
+            } catch (error) {
+                alert("Network error: " + error.message);
+            }
+        }
+
+        // Delete Secret
+        async function deleteSecret(id) {
+            if (!confirm("Are you sure you want to delete this secret?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/secrets/${id}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    loadSecrets();
+                    showTempMessage('✅ Secret deleted successfully!', 'success');
+                } else {
+                    alert("Error deleting secret");
+                }
+            } catch (error) {
+                alert("Network error: " + error.message);
+            }
+        }
+
+        // Reveal Secret
+        async function revealSecret(id, button) {
+            try {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                button.disabled = true;
+
+                const res = await fetch(`${API_BASE}/secrets/${id}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to fetch secret');
+                }
+
+                const data = await res.json();
+                
+                // Create modal for displaying secret
+                const modal = document.createElement('div');
+                modal.style.position = 'fixed';
+                modal.style.top = '0';
+                modal.style.left = '0';
+                modal.style.width = '100%';
+                modal.style.height = '100%';
+                modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                modal.style.display = 'flex';
+                modal.style.justifyContent = 'center';
+                modal.style.alignItems = 'center';
+                modal.style.zIndex = '10000';
+                
+                modal.innerHTML = `
+                    <div style="background: #2d2d41; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; text-align: center; border: 1px solid #555;">
+                        <h3 style="margin-bottom: 20px; color: white;">Secret Value</h3>
+                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; word-break: break-all; font-family: monospace; color: white;">
+                            ${data.value}
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="copySecretBtn" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button id="closeModalBtn" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                document.getElementById('copySecretBtn').addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(data.value);
+                        showTempMessage('✅ Secret copied to clipboard!', 'success');
+                    } catch (err) {
+                        showTempMessage('❌ Failed to copy secret', 'error');
+                    }
+                });
+                
+                document.getElementById('closeModalBtn').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }
+                });
+                
+            } catch (error) {
+                alert("Error revealing secret: " + error.message);
+                button.innerHTML = '<i class="fas fa-eye"></i> Reveal';
+                button.disabled = false;
+            }
+        }
+
+        // Helper function to show temporary messages
+        function showTempMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.position = 'fixed';
+            msg.style.top = '20px';
+            msg.style.right = '20px';
+            msg.style.zIndex = '1000';
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+
+        // Enter key support for login
+        document.getElementById("password").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                document.getElementById("login-btn").click();
+            }
+        });
+
+        // Auto-focus on password field after username input
+        document.getElementById("username").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                document.getElementById("password").focus();
+            }
+        });
+
+        // Make functions global for onclick handlers
+        window.updateSecret = updateSecret;
+        window.deleteSecret = deleteSecret;
+        window.revealSecret = revealSecret;
+    </script>
+</body>
+</html>
