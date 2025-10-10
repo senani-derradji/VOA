@@ -17,6 +17,11 @@ app = FastAPI(title="VOA : VAULITY OPS API",
               version="1.0.0")
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
@@ -59,6 +64,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 @app.get("/", include_in_schema=False)
 async def serve_index():
     return FileResponse("app/static/index.html")
+
 
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])

@@ -15,6 +15,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 db_test.py
+.pytest_cache/
+.mypy_cache/
+.coverage
+.hypothesis/
+.pytest_
 
 # SQLite or local databases
 *.db
@@ -69,7 +74,6 @@ app/static/dist/
 # ---------------------------
 # 🧰 Certificates (if any)
 # ---------------------------
-certs/
 *.pem
 *.crt
 *.key
@@ -87,3 +91,4 @@ docker-compose.yml
 # ---------------------------
 __MACOSX/
 blocked_ips.log
+certs/

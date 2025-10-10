@@ -10,6 +10,11 @@ class SecretsBase(BaseModel):
 class SecretsCreate(SecretsBase):
     pass
 
+class SecretsUpdate(BaseModel):
+    name: str  = None
+    value: str = None
+    environment: str = None
+
 class Secrets(SecretsBase):
     id: int
     user_id: int
