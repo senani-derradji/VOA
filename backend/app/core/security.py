@@ -39,6 +39,8 @@ def create_refresh_token(data: dict, expires_delta: timedelta = timedelta(days=7
 def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SEC_KEY, algorithms=[ALGORITHM])
+        print("Decoded token payload:", payload)
         return payload
     except JWTError:
+        print("Invalid token")
         return None

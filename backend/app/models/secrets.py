@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.core.database import Base
-from app.utils.TimeNow import time_
+from datetime import datetime
+
 
 class SecretsModel(Base):
     __tablename__ = "secrets_table"
@@ -10,7 +11,7 @@ class SecretsModel(Base):
     name = Column(String(10), index=True)
     value = Column(String)
     environment = Column(String(4), default="dev")
-    created_at = Column(DateTime, default=time_)
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     owner_id = Column(Integer, ForeignKey("users_table.id"))
     owner = relationship("UserModel", back_populates="secrets")

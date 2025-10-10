@@ -3,9 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import UserModel
-from app.core.security import create_access_token, verify_password, create_refresh_token, SEC_KEY, ALGORITHM
+from app.core.security import create_access_token, verify_password, create_refresh_token, get_password_hash, SEC_KEY, ALGORITHM
 from fastapi.security import OAuth2PasswordRequestForm
-from app.core.security import verify_password
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from datetime import timedelta
@@ -22,11 +21,13 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/login")
-@limiter.limit(f"{rand}/hour", error_message="to many requests (we have blocked you 1H)")
+@limiter.limit(f"100/hour", error_message="to many requests (we have blocked you 1H)")
 async def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(), 
-          db: Session = Depends(get_db)):
+          db: Session = Depends(get_db)
+          ):
     user = db.query(UserModel).filter(UserModel.username == form_data.username).first()
+    print(user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
@@ -39,7 +40,7 @@ async def login(request: Request,
     access_token = create_access_token({"sub": user.username, "role": user.role}, access_token_expires)
     refresh_token = create_refresh_token({"sub": user.username, "role": user.role}, refresh_token_expires)
 
-    log_action(db, user.id, f"login")
+    log_action(db, user.id, "login")
 
 
     return {
@@ -79,12 +80,15 @@ def register(
     if user:
         raise HTTPException(status_code=400, detail="User already exists")
     
+    hashed_password = get_password_hash(password)
     new_user = UserModel(
         username=username, 
-        password=password, 
+        password=hashed_password, 
         role=role
         )
     log_action(db, current_user.id, f"create_user ({new_user.username})")
+    
+    db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return {"message": "User created successfully"}
+    return {"message": f"User {new_user.username} created successfully"}

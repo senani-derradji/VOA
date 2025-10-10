@@ -11,29 +11,6 @@ from app.schemas.secrets import SecretsUpdate
 
 router = APIRouter()
 
-@router.get("/")
-def get_all_secrets(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Get all secrets"""
-    if current_user.role == "admin":
-        secrets = db.query(Secret).all()
-    
-    elif current_user.role == "developer":
-        secrets = db.query(Secret).filter_by(owner_id=current_user.id).all()
-    
-    result = []
-    for secret in secrets:
-        result.append({
-            "id": secret.id,
-            "name": secret.name,
-            "env": getattr(secret, 'environment', 'development'),
-            "owner_id": secret.owner_id
-        })
-    
-    log_action(db, current_user.id, f"get_all_secrets")
-    return result
 
 @router.post("/create")
 def create_secret(
@@ -60,6 +37,34 @@ def create_secret(
     log_action(db, current_user.id, f"create_secret ({name})")
     return {"message": "Secret created successfully", "secret_id": new_secret.id}
 
+@router.get("/")
+def get_all_secrets(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all secrets"""
+    if current_user.role == "admin":
+        secrets = db.query(Secret).all()
+    elif current_user.role == "developer":
+        secrets = db.query(Secret).filter(Secret.owner_id == current_user.id).all()
+    else:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    result = []
+    for secret in secrets:
+        result.append({
+            "id": secret.id,
+            "name": secret.name,
+            "env": getattr(secret, 'environment', 'development'),
+            "owner_id": secret.owner_id
+        })
+
+    log_action(db, current_user.id, f"get_all_secrets")
+    print(f"Current user: {current_user.username}, role: {current_user.role}, id: {current_user.id}")
+
+    return result
+
+
 @router.get("/{secret_id}")
 def get_secret(
     secret_id: int,
@@ -71,13 +76,12 @@ def get_secret(
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
 
-    # Allow admin to access any secret, but developer only his own
-    if current_user.role != "admin" and secret.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
+    if current_user.role == "admin" or secret.owner_id == current_user.id:
+        decrypted_value = decrypt(secret.value)
+    else:
+        raise HTTPException(status_code=403, detail="Not authorized to view this secret")
 
-    decrypted_value = decrypt(secret.value)
     log_action(db, current_user.id, f"get_secret ({secret.name})")
-
     return {
         "id": secret.id,
         "name": secret.name,
@@ -123,7 +127,10 @@ def delete_secret(
 
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
-
+    
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to delete this secret")
+    
     db.delete(secret)
     db.commit()
     log_action(db, current_user.id, f"delete_secret ({secret.name})")
