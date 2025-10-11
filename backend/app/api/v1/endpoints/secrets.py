@@ -12,7 +12,11 @@ from app.schemas.secrets import SecretsUpdate
 router = APIRouter()
 
 
-@router.post("/create")
+@router.post(
+    "/create",
+    summary="Create a new secret",
+    description="Creates and stores a new secret for the authenticated user."
+)
 def create_secret(
     name: str,
     value: str,
@@ -37,7 +41,13 @@ def create_secret(
     log_action(db, current_user.id, f"create_secret ({name})")
     return {"message": "Secret created successfully", "secret_id": new_secret.id}
 
-@router.get("/")
+
+
+@router.get(
+    "/",
+    summary="Get all secrets",
+    description="Retrieves all secrets accessible by the current user."
+)
 def get_all_secrets(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -60,12 +70,17 @@ def get_all_secrets(
         })
 
     log_action(db, current_user.id, f"get_all_secrets")
-    print(f"Current user: {current_user.username}, role: {current_user.role}, id: {current_user.id}")
+    # print(f"Current user: {current_user.username}, role: {current_user.role}, id: {current_user.id}")
 
     return result
 
 
-@router.get("/{secret_id}")
+
+@router.get(
+    "/{secret_id}",
+    summary="Get a specific secret",
+    description="Retrieves a secret by its ID if the user has permission."
+)
 def get_secret(
     secret_id: int,
     db: Session = Depends(get_db),
@@ -89,7 +104,11 @@ def get_secret(
         "env": getattr(secret, 'environment', 'development')
     }
 
-@router.put("/{secret_id}")
+@router.put(
+    "/{secret_id}",
+    summary="Update a secret",
+    description="Updates an existing secret if the user is the owner or an admin."
+)
 def update_secret(
     secret_id: int,
     secret_data: SecretsUpdate,
@@ -102,7 +121,7 @@ def update_secret(
         raise HTTPException(status_code=404, detail="Secret not found")
 
     if current_user.role != "admin" and secret.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this secret")
+        raise HTTPException(status_code=403, detail="Not authorized")
     
     if secret_data.value is not None:
         secret.value = encrypt(secret_data.value)
@@ -117,7 +136,13 @@ def update_secret(
 
     return {"message": "Secret updated successfully"}
 
-@router.delete("/{secret_id}")
+
+
+@router.delete(
+    "/{secret_id}",
+    summary="Delete a secret",
+    description="Deletes a secret by ID. Only admins or the owner can delete it."
+)
 def delete_secret(
     secret_id: int,
     db: Session = Depends(get_db),

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.api import api_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from app.api.v1.endpoints import auth, secrets
+# from app.api.v1.endpoints import auth, secrets
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -12,9 +12,23 @@ import logging
 from fastapi import Request
 
 
-app = FastAPI(title="VOA : VAULITY OPS API",
-              description="Secrets Manager API",
-              version="1.0.0")
+tags_metadata = [
+    {"name": "Auth", "description": "Authentication and token operations."},
+    {"name": "Users", "description": "User registration and management."},
+    {"name": "Secrets", "description": "CRUD operations for secrets."},
+]
+
+app = FastAPI(
+    title="VOA : VAULITY OPS API",
+    description="Secrets Manager API for secure credential and secret management.",
+    version="1.0.0",
+    openapi_tags=tags_metadata,
+    contact={
+        "Github": "https://github.com/senani-derradji",
+        "FullName": "Derradji Senani",
+        "Email": "derradjisn@gmail.com"
+    },
+)
 
 
 @app.get("/health")
@@ -25,6 +39,10 @@ def health_check():
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
 ]
 
 
@@ -35,7 +53,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -59,13 +76,6 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         content={"detail": "Too many requests. Try again later."}
     )
 
+# app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-@app.get("/", include_in_schema=False)
-async def serve_index():
-    return FileResponse("app/static/index.html")
-
-
-
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
-app.include_router(secrets.router, prefix="/api/v1/secrets", tags=["Secrets"])
+app.include_router(api_router, prefix="/api/v1")

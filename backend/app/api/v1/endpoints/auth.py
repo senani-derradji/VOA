@@ -20,14 +20,17 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
-@router.post("/login")
-@limiter.limit(f"100/hour", error_message="to many requests (we have blocked you 1H)")
+@router.post(
+    "/login",
+    summary="User login and token generation",
+    description="Authenticates a user using username and password, then returns a JWT access token for future requests."
+)
+@limiter.limit(f"100/minute", error_message="to many requests (we have blocked you 1H)")
 async def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(), 
           db: Session = Depends(get_db)
           ):
     user = db.query(UserModel).filter(UserModel.username == form_data.username).first()
-    print(user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
@@ -49,7 +52,11 @@ async def login(request: Request,
         "token_type": "bearer"
     }
 
-@router.post("/refresh")
+@router.post(
+    "/refresh",
+    summary="Refresh access token",
+    description="Generates a new access token using a valid refresh token."
+)
 def refresh_token(refresh_token: str):
     try:
         payload = jwt.decode(refresh_token, SEC_KEY, algorithms=[ALGORITHM])
@@ -63,32 +70,3 @@ def refresh_token(refresh_token: str):
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
-
-@router.post("/register")
-def register(
-    username: str, 
-    password: str, 
-    role: str, 
-    db: Session = Depends(get_db), 
-    current_user=Depends(get_current_user)
-    ):
-    
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Access forbidden")
-    
-    user = db.query(UserModel).filter(UserModel.username == username).first()
-    if user:
-        raise HTTPException(status_code=400, detail="User already exists")
-    
-    hashed_password = get_password_hash(password)
-    new_user = UserModel(
-        username=username, 
-        password=hashed_password, 
-        role=role
-        )
-    log_action(db, current_user.id, f"create_user ({new_user.username})")
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return {"message": f"User {new_user.username} created successfully"}

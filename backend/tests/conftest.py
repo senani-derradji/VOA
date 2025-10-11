@@ -1,4 +1,3 @@
-import pytest, os
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -6,17 +5,25 @@ from app.core.database import Base, get_db
 from app.main import app
 from app.models.user import UserModel
 from app.core.security import get_password_hash
+import random, string, pytest, os
 
+random_name = ''.join(random.choices(string.ascii_lowercase, k=10))
 
-db_path = "./TEST_VOA_SECRETS_MANAGER.db"
+db_path = f"./TEST_VOA_{random_name}.db"
+
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False})
+
+TestingSessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=engine)
 
 if os.path.exists(db_path):
     os.remove(db_path)
 
-# Override dependency
 def override_get_db():
     db = TestingSessionLocal()
     try:
@@ -25,26 +32,26 @@ def override_get_db():
         db.close()
 
 app.dependency_overrides[get_db] = override_get_db
+Base.metadata.create_all(bind=engine)
 
-def db():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    admin = UserModel(
-        username="admin", 
-        password=get_password_hash("admin"), 
-        role="admin")
-    db.add(admin)
-    db.commit()
-    db.refresh(admin)
-    db.close()
+db = TestingSessionLocal()
+admin = UserModel(
+    username="admin", 
+    password=get_password_hash("admin"), 
+    role="admin")
+db.add(admin)
+db.commit()
+db.refresh(admin)
+db.close()
 
-    dev = UserModel(username="dev", password=get_password_hash("dev"), role="developer")
-    db.add(dev)
-    db.commit()
-    db.refresh(dev)
-    db.close()
-
-db()
+dev = UserModel(
+    username="dev", 
+    password=get_password_hash("dev"), 
+    role="developer")
+db.add(dev)
+db.commit()
+db.refresh(dev)
+db.close()
 
 @pytest.fixture(scope="module")
 def client():

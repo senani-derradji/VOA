@@ -55,6 +55,14 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Node.js
+node_modules/
+dist/
+.env
+.vscode/
+.DS_Store
+*.log
+
 # ---------------------------
 # 🧠 Frontend (if using static HTML/JS)
 # ---------------------------
