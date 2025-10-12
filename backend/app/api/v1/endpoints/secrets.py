@@ -20,12 +20,16 @@ router = APIRouter()
 def create_secret(
     name: str,
     value: str,
-    env: str = "development",
+    env: str = "dev",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     if db.query(Secret).filter_by(name=name).first():
         raise HTTPException(status_code=400, detail="Secret name already exists")
+    
+    if env not in ["dev", "test" ,"prod"]:
+        raise HTTPException(status_code=400, detail="Invalid environment")
+    
 
     encrypted_value = encrypt(value)
     new_secret = Secret(
