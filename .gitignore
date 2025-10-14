@@ -10,6 +10,7 @@ env/
 env.yaml
 
 
+
 # Python cache and compiled files
 __pycache__/
 *.py[cod]
@@ -28,7 +29,7 @@ backend/SMA.db
 
 
 # Local environment files
-.env
+
 .env.local
 .env.*.local
 
@@ -89,9 +90,6 @@ app/static/dist/
 # ---------------------------
 # 🚀 Deployment / Docker
 # ---------------------------
-.dockerignore
-Dockerfile
-docker-compose.yml
 *.pid
 
 # ---------------------------

@@ -23,6 +23,9 @@ def register(
     db: Session = Depends(get_db), 
     current_user=Depends(get_current_user)
     ):
+
+    if len(username) > 50 or len(password) > 50 or role not in ["admin", "developer"]: 
+        raise ValueError("username/password < 50 charachter -- roles : admin or developer")
     
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
@@ -46,9 +49,6 @@ def register(
 
 @router.get("/")
 def get_users(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    """
-    Get all users (Admin only)
-    """
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
     
@@ -63,9 +63,6 @@ def change_user_role(
     db: Session = Depends(get_db), 
     current_user=Depends(get_current_user)
 ):
-    """
-    Change user role (Admin only)
-    """
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
     
@@ -89,9 +86,6 @@ def delete_user(
     db: Session = Depends(get_db), 
     current_user=Depends(get_current_user)
 ):
-    """
-    Delete user (Admin only)
-    """
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
     

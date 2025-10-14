@@ -24,6 +24,10 @@ def create_secret(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    if len(name) > 25 or len(value) > 100:
+        raise HTTPException(status_code=400, detail="name > 25 char / value > 100 char")
+
+
     if db.query(Secret).filter_by(name=name).first():
         raise HTTPException(status_code=400, detail="Secret name already exists")
     
@@ -73,7 +77,7 @@ def get_all_secrets(
             "owner_id": secret.owner_id
         })
 
-    log_action(db, current_user.id, f"get_all_secrets")
+    log_action(db, current_user.id, "get_all_secrets")
     # print(f"Current user: {current_user.username}, role: {current_user.role}, id: {current_user.id}")
 
     return result

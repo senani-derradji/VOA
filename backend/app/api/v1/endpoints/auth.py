@@ -1,15 +1,21 @@
-# app/api/v1/endpoints/auth.py
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import ( APIRouter, 
+                     Depends, 
+                     HTTPException, 
+                     Request )
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import UserModel
-from app.core.security import create_access_token, verify_password, create_refresh_token, get_password_hash, SEC_KEY, ALGORITHM
+from app.core.security import ( create_access_token, 
+                               verify_password, 
+                               create_refresh_token, 
+                               # get_password_hash, 
+                               SEC_KEY, 
+                               ALGORITHM )
 from fastapi.security import OAuth2PasswordRequestForm
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from datetime import timedelta
-from app.core.deps import get_current_user
-from app.models.user import UserModel
+# from app.core.deps import get_current_user
 from app.utils.RandomNumber import random_integer as rand
 from app.services.audit import log_action
 from jose import jwt, JWTError
@@ -25,7 +31,7 @@ limiter = Limiter(key_func=get_remote_address)
     summary="User login and token generation",
     description="Authenticates a user using username and password, then returns a JWT access token for future requests."
 )
-@limiter.limit(f"100/minute", error_message="to many requests (we have blocked you 1H)")
+@limiter.limit(f"{rand}/minute", error_message="to many requests (we have blocked you 1H)")
 async def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(), 
           db: Session = Depends(get_db)
