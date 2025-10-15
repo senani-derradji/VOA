@@ -9,7 +9,6 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# ---- Serve Static Files ----
 FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80

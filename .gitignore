@@ -42,6 +42,7 @@ backend/SMA.db
 *.log
 logs/
 *.out
+*.swap
 
 # Build / distribution folders
 build/
@@ -68,6 +69,7 @@ dist/
 # 🧠 Frontend (if using static HTML/JS)
 # ---------------------------
 # Node.js / npm
+
 node_modules/
 npm-debug.log*
 yarn-debug.log*

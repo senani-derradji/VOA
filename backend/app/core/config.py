@@ -7,7 +7,8 @@ load_dotenv()
 class Settings:
     raw_db_url = os.getenv("DATABASE_URL", "sqlite://./SMA.db")
     DATABASE_URL = Template(raw_db_url).substitute(
-        USER=os.getenv("DB_USER"),
+        USER=os.getenv("DB_USER", "derradji"),
+        HOST=os.getenv("DB_HOST", "localhost"),
         PASSWORD=os.getenv("DB_PASSWORD")
     )
     SECRET_KEY = os.getenv("SECRET_KEY", "derradji_senani")
