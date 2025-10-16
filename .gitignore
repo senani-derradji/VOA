@@ -100,4 +100,4 @@ app/static/dist/
 __MACOSX/
 blocked_ips.log
 certs/
-.github/*
+# .github/*
