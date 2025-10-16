@@ -7,19 +7,21 @@ from app.models.user import UserModel
 from app.core.security import get_password_hash
 import random, string, pytest, os
 
-random_name = ''.join(random.choices(string.ascii_lowercase, k=10))
 
+random_name = ''.join(random.choices(string.ascii_lowercase, k=10))
 db_path = f"./TEST_VOA_{random_name}.db"
 
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    connect_args={"check_same_thread": False})
 
-TestingSessionLocal = sessionmaker(
-    autocommit=False, 
-    autoflush=False, 
-    bind=engine)
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", f"sqlite:///{db_path}")
+DB_USER=os.getenv("DB_USER", "root")
+DB_PASSWORD=os.getenv("DB_PASSWORD", "root")
+DB_HOST=os.getenv("DB_HOST", "localhost")
+DB_NAME=os.getenv("DB_NAME")
+
+
+engine = create_engine(TEST_DATABASE_URL)
+
+TestingSessionLocal = sessionmaker(bind=engine)
 
 if os.path.exists(db_path):
     os.remove(db_path)

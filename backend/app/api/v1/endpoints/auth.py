@@ -31,7 +31,7 @@ limiter = Limiter(key_func=get_remote_address)
     summary="User login and token generation",
     description="Authenticates a user using username and password, then returns a JWT access token for future requests."
 )
-@limiter.limit(f"{rand}/minute", error_message="to many requests (we have blocked you 1H)")
+@limiter.limit(f"1000/minute", error_message="to many requests (we have blocked you 1H)")
 async def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(), 
           db: Session = Depends(get_db)

@@ -43,7 +43,6 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      # DATABASE_URL:postgresql://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}
 
     volumes:
       - ./backend:/app

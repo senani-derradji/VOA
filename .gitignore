@@ -15,7 +15,6 @@ env.yaml
 __pycache__/
 *.py[cod]
 *$py.class
-db_test.py
 .pytest_cache/
 .mypy_cache/
 .coverage

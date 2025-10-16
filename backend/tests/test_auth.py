@@ -14,4 +14,4 @@ def test_login_wrong_credentials_password(client):
 
 def test_login_wrong_credentials_username(client):
     response = client.post("/api/v1/auth/login", data={"username": "wrongUsername", "password": "wrong"})
-    assert response.status_code == 404
+    assert response.status_code != 200

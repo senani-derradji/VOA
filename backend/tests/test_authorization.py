@@ -4,6 +4,7 @@ def test_dev_cannot_delete_other_secret(client, auth_headers_admin, auth_headers
 
     resp = create_secret(client, auth_headers_admin, name="admin_secret")
     secret_id = resp.json()["secret_id"]
+    print(secret_id)
 
     resp = client.delete(f"/api/v1/secrets/{secret_id}", headers=auth_headers_dev)
     assert resp.status_code == 403
