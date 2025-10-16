@@ -30,7 +30,7 @@ jobs:
         
         - name: Run backend tests
           run: |
-            docker exec backend pytest -v --tb=short
+            docker exec voa-backend pytest -v --tb=short
 
         - name: Shutdown services
           run: docker-compose down -v
