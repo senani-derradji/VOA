@@ -28,8 +28,6 @@ services:
     networks:
       - backnet
 
-
-
   backend:
     build: ./backend
     container_name: voa-backend
@@ -52,7 +50,6 @@ services:
     networks:
       - backnet
       - frontnet
-
 
   frontend:
     build: ./frontend
