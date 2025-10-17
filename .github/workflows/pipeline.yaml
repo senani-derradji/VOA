@@ -38,3 +38,17 @@ jobs:
         
         - name: Shutdown services
           run: docker-compose down -v
+
+    artifact:
+        needs: unit_tests
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        
+        - name: Load Docker images
+          run: |
+            docker-compose -f docker-compose.yml build backend
+
+        - name: Save backend image as artifact
+          run: |
+            docker save voa-backend:latest | gzip > voa-backend.tar.gz

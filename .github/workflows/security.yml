@@ -27,3 +27,12 @@ jobs:
           cat safety_report.txt
           echo "---- BANDIT REPORT ----"
           cat bandit_report.txt
+
+      - name: Policy Gate
+        run: 
+            if grep -E "CRITICAL|HIGH" bandit_report.txt; then
+               echo "security Checks Failed"
+               exit 1
+            else
+               echo "security Checks Passed"
+            fi
