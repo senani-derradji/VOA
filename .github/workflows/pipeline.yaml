@@ -42,6 +42,13 @@ jobs:
         - name: Save backend image as artifact
           run: |
             docker save voa-backend:latest | gzip > voa-backend.tar.gz
+
+        - name: Upload artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: voa-backend-image
+            path: voa-backend.tar.gz
+            retention-days: 7
     
         - name: Shutdown services
           run: docker-compose down -v
