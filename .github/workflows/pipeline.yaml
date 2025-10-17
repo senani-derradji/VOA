@@ -10,7 +10,7 @@ jobs:
     core_scan:
       uses: ./.github/workflows/security.yml
       
-    unit_tests:
+    unit_tests_and_build:
         needs: core_scan
         runs-on: ubuntu-latest
         steps:
@@ -35,16 +35,6 @@ jobs:
         - name: Run backend tests
           run: |
             docker exec voa-backend pytest -v --tb=short
-        
-        - name: Shutdown services
-          run: docker-compose down -v
-
-    artifact:
-        needs: unit_tests
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v4
-        
         - name: Load Docker images
           run: |
             docker-compose -f docker-compose.yml build backend
@@ -52,3 +42,6 @@ jobs:
         - name: Save backend image as artifact
           run: |
             docker save voa-backend:latest | gzip > voa-backend.tar.gz
+    
+        - name: Shutdown services
+          run: docker-compose down -v
