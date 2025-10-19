@@ -6,7 +6,7 @@ from app.models.secrets import SecretsModel as Secret
 from app.models.user import UserModel as User
 from app.core.encryption import encrypt, decrypt
 from app.services.audit import log_action
-from app.schemas.secrets import SecretsUpdate
+from app.schemas.secrets import SecretsUpdate, SecretsCreate, SecretsOut
 
 
 router = APIRouter()
@@ -18,22 +18,16 @@ router = APIRouter()
     description="Creates and stores a new secret for the authenticated user."
 )
 def create_secret(
-    name: str,
-    value: str,
-    env: str = "dev",
+    data_form: SecretsCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if len(name) > 25 or len(value) > 100:
-        raise HTTPException(status_code=400, detail="name > 25 char / value > 100 char")
-
+    name = data_form.name
+    env = data_form.environment
+    value = data_form.value
 
     if db.query(Secret).filter_by(name=name).first():
         raise HTTPException(status_code=400, detail="Secret name already exists")
-    
-    if env not in ["dev", "test" ,"prod"]:
-        raise HTTPException(status_code=400, detail="Invalid environment")
-    
 
     encrypted_value = encrypt(value)
     new_secret = Secret(
@@ -46,7 +40,7 @@ def create_secret(
     db.commit()
     db.refresh(new_secret)
 
-    log_action(db, current_user.id, f"create_secret ({name})")
+    log_action(db, current_user.id, f"create")
     return {"message": "Secret created successfully", "secret_id": new_secret.id}
 
 
@@ -77,8 +71,7 @@ def get_all_secrets(
             "owner_id": secret.owner_id
         })
 
-    log_action(db, current_user.id, "get_all_secrets")
-    # print(f"Current user: {current_user.username}, role: {current_user.role}, id: {current_user.id}")
+    log_action(db, current_user.id, "list")
 
     return result
 
@@ -96,15 +89,16 @@ def get_secret(
 ):
     secret = db.query(Secret).filter_by(id=secret_id).first()
 
-    if not secret:
-        raise HTTPException(status_code=404, detail="Secret not found")
+    if not secret: raise HTTPException(status_code=404, detail="Secret not found")
 
-    if current_user.role == "admin" or secret.owner_id == current_user.id:
-        decrypted_value = decrypt(secret.value)
-    else:
+    if current_user.role == "admin": decrypted_value = decrypt(secret.value)
+    else: 
+        decrypted_value = secret.value
         raise HTTPException(status_code=403, detail="Not authorized to view this secret")
+    
 
-    log_action(db, current_user.id, f"get_secret ({secret.name})")
+    log_action(db, current_user.id, f"read")
+
     return {
         "id": secret.id,
         "name": secret.name,
@@ -140,7 +134,7 @@ def update_secret(
 
     db.commit()
     db.refresh(secret)
-    log_action(db, current_user.id, f"update_secret ({secret.name})")
+    log_action(db, current_user.id, f"update")
 
     return {"message": "Secret updated successfully"}
 
@@ -166,7 +160,7 @@ def delete_secret(
     
     db.delete(secret)
     db.commit()
-    log_action(db, current_user.id, f"delete_secret ({secret.name})")
+    log_action(db, current_user.id, f"delete")
 
 
     return {"message": "Secret deleted successfully"}

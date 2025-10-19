@@ -5,11 +5,10 @@ from app.models.user import UserModel
 from app.core.security import get_password_hash
 from app.core.deps import get_current_user
 from app.services.audit import log_action
+from app.schemas.user import UserCreate, UserOut
 
 
 router = APIRouter()
-
-# Add these endpoints to your existing users.py
 
 @router.post(
     "/register",
@@ -17,15 +16,16 @@ router = APIRouter()
     description="Creates a new user account with username, password, and role."
 )
 def register(
-    username: str, 
-    password: str, 
-    role: str, 
+    data_form: UserCreate, 
     db: Session = Depends(get_db), 
     current_user=Depends(get_current_user)
     ):
 
-    if len(username) > 50 or len(password) > 50 or role not in ["admin", "developer"]: 
-        raise ValueError("username/password < 50 charachter -- roles : admin or developer")
+    username = data_form.username
+    password = data_form.password
+    role = data_form.role
+
+    
     
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
@@ -58,11 +58,13 @@ def get_users(db: Session = Depends(get_db), current_user=Depends(get_current_us
 
 @router.put("/{user_id}")
 def change_user_role(
-    user_id: int, 
-    new_role: str, 
+    data_form : UserOut,
     db: Session = Depends(get_db), 
     current_user=Depends(get_current_user)
 ):
+    user_id = data_form.id
+    new_role = data_form.role
+    
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
     
@@ -70,9 +72,9 @@ def change_user_role(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    valid_roles = ["admin", "developer", "viewer"]
-    if new_role not in valid_roles:
-        raise HTTPException(status_code=400, detail="Invalid role")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role")
+    
     
     user.role = new_role
     log_action(db, current_user.id, f"change_user_role ({user.username} to {new_role})")
