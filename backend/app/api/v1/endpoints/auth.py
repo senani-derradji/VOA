@@ -1,11 +1,11 @@
-from fastapi import ( APIRouter, 
+from fastapi import (APIRouter, 
                      Depends, 
                      HTTPException, 
                      Request )
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import UserModel
-from app.core.security import ( create_access_token, 
+from app.core.security import (create_access_token, 
                                verify_password, 
                                create_refresh_token, 
                                SEC_KEY, 
@@ -59,12 +59,12 @@ async def login(request: Request,
 
     redis_client.setex(
         f"access_token:{access_token}",
-        1800,
+        30*60,
         json.dumps(token_data)
     )
     redis_client.setex(
         f"refresh_token:{refresh_token}",
-        604800,
+        7*24*60*60,
         json.dumps(token_data)
     )
     redis_client.hset(
@@ -74,7 +74,7 @@ async def login(request: Request,
             "last_login": str(datetime.utcnow())
         }
     )
-
+    
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -99,8 +99,7 @@ def refresh_token(refresh_token: str):
 
         username = payload.get("sub")
         new_access_token = create_access_token({"sub": username})
-
-        redis_client.setex(f"access_token:{new_access_token}", 1800, data)
+        # redis_client.setex(f"access_token:{new_access_token}", 1800, data)
 
         return {"access_token": new_access_token, "token_type": "bearer"}
 

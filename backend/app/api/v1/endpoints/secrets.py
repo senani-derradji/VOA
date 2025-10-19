@@ -6,8 +6,8 @@ from app.models.secrets import SecretsModel as Secret
 from app.models.user import UserModel as User
 from app.core.encryption import encrypt, decrypt
 from app.services.audit import log_action
-from app.schemas.secrets import SecretsUpdate, SecretsCreate, SecretsOut
-
+from app.schemas.secrets import (SecretsUpdate, 
+                                 SecretsCreate)
 
 router = APIRouter()
 
@@ -40,7 +40,7 @@ def create_secret(
     db.commit()
     db.refresh(new_secret)
 
-    log_action(db, current_user.id, f"create")
+    log_action(db, current_user.id, f"create_secret ({new_secret.name})")
     return {"message": "Secret created successfully", "secret_id": new_secret.id}
 
 
@@ -55,10 +55,8 @@ def get_all_secrets(
     current_user: User = Depends(get_current_user)
 ):
     """Get all secrets"""
-    if current_user.role == "admin":
-        secrets = db.query(Secret).all()
-    elif current_user.role == "developer":
-        secrets = db.query(Secret).filter(Secret.owner_id == current_user.id).all()
+    if current_user.role == "admin": secrets = db.query(Secret).all()
+    elif current_user.role == "developer": secrets = db.query(Secret).filter(Secret.owner_id == current_user.id).all()
     else:
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -67,11 +65,10 @@ def get_all_secrets(
         result.append({
             "id": secret.id,
             "name": secret.name,
-            "env": getattr(secret, 'environment', 'development'),
             "owner_id": secret.owner_id
         })
 
-    log_action(db, current_user.id, "list")
+    log_action(db, current_user.id, "list_secrets")
 
     return result
 
@@ -91,13 +88,14 @@ def get_secret(
 
     if not secret: raise HTTPException(status_code=404, detail="Secret not found")
 
-    if current_user.role == "admin": decrypted_value = decrypt(secret.value)
+    if current_user.role == "admin": decrypted_value = decrypt(secret.value)[:5] + "..."*5
+
     else: 
         decrypted_value = secret.value
         raise HTTPException(status_code=403, detail="Not authorized to view this secret")
     
 
-    log_action(db, current_user.id, f"read")
+    log_action(db, current_user.id, f"read_secret ({secret.name})")
 
     return {
         "id": secret.id,
@@ -134,7 +132,7 @@ def update_secret(
 
     db.commit()
     db.refresh(secret)
-    log_action(db, current_user.id, f"update")
+    log_action(db, current_user.id, f"update_secret ({secret.name})")
 
     return {"message": "Secret updated successfully"}
 
@@ -160,7 +158,7 @@ def delete_secret(
     
     db.delete(secret)
     db.commit()
-    log_action(db, current_user.id, f"delete")
+    log_action(db, current_user.id, f"delete_secret ({secret.name})")
 
 
     return {"message": "Secret deleted successfully"}

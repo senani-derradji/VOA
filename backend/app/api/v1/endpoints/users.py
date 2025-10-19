@@ -25,7 +25,7 @@ def register(
     password = data_form.password
     role = data_form.role
 
-    
+    print("Registering user:", username, "with role:", role)
     
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden")
@@ -77,7 +77,7 @@ def change_user_role(
     
     
     user.role = new_role
-    log_action(db, current_user.id, f"change_user_role ({user.username} to {new_role})")
+    log_action(db, current_user.id, f"update_user_role ({user.username} to {new_role})")
     db.commit()
     return {"message": f"User role updated to {new_role}"}
 

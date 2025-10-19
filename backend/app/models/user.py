@@ -6,7 +6,7 @@ class UserModel(Base):
     __tablename__ = "users_table"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(10), unique=True, index=True)
+    username = Column(String(26), unique=True, index=True)
     password = Column(String)
     role = Column(String(10), default="user")
 
