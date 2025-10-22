@@ -80,17 +80,6 @@ services:
       - backnet
       - frontnet
 
-  # frontend:
-  #   build: ./frontend
-  #   image: voa-frontend:1.0.0
-  #   container_name: voa-frontend
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   networks:
-  #     - frontend
 
 
   nginx:

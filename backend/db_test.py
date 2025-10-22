@@ -1,19 +1,17 @@
 from app.core.database import SessionLocal, engine, Base
 from app.models.user import UserModel as User
-from app.models.secrets import SecretsModel as Secret
-from app.models.audit import AuditModel as Audit
 from app.core.security import get_password_hash
 
 Base.metadata.create_all(bind=engine)
 
 db = SessionLocal()
 
-admin_username = "admin"
-admin_password = "admin123"
+admin_username = "adminderradji"
+admin_password = "Admin@PassWord.1+1"
 
 existing_user = db.query(User).filter(User.username == admin_username).first()
-if existing_user:
-    print(f"Admin '{admin_username}' already exists.")
+
+if existing_user: print(f"Admin '{admin_username}' already exists.")
 else:
     print ("Create ADMIN ....")
     user = User(username=admin_username, 
@@ -22,3 +20,9 @@ else:
     db.add(user)
     db.commit()
     db.close()
+
+print(f"""
+\n\nINFO :
+    username: {admin_username}
+    password: {admin_password}\n\n
+""")

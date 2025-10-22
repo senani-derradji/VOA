@@ -7,8 +7,8 @@ class UserModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(26), unique=True, index=True)
-    password = Column(String)
-    role = Column(String(10), default="user")
+    password = Column(String(256))
+    role = Column(String(10), default="developer")
 
     secrets = relationship("SecretsModel", back_populates="owner")
     audit_logs = relationship("AuditModel", back_populates="owner")

@@ -8,12 +8,17 @@ class SecretsCreate(BaseModel):
     @validator("name")
     def Validate_secret_name(cls, name):
         if any(char.isdigit() for char in name): raise HTTPException("Secret name cannot contain numbers")
+        if len(name) > 50 : raise HTTPException("Secret name cannot be longer than 50 characters")
         return name
     value: str = Field(min_length=1, max_length=256)
+    @validator("value")
+    def Validate_secret_value(cls, value):
+        if len(value) > 256 : raise HTTPException("Secret value cannot be longer than 256 characters")
+        return value
     environment: str = "dev"
     @validator("environment")
     def Validate_environment(cls, environment):
-        if environment not in ["dev", "test", "prod"]: HTTPException("dev or test or prod")
+        if environment not in ["dev", "test", "prod"]: HTTPException("environment should be just : dev or test or prod")
 
 class SecretsUpdate(BaseModel):
     name: str  = None

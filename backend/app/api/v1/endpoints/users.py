@@ -28,6 +28,7 @@ def register(
     print("Registering user:", username, "with role:", role)
     
     if current_user.role != "admin":
+        log_action(db, current_user.id, "Create user : access_forbidden")
         raise HTTPException(status_code=403, detail="Access forbidden")
     
     user = db.query(UserModel).filter(UserModel.username == username).first()
@@ -66,6 +67,7 @@ def change_user_role(
     new_role = data_form.role
     
     if current_user.role != "admin":
+        log_action(db, current_user.id, "Change user role : access_forbidden")
         raise HTTPException(status_code=403, detail="Access forbidden")
     
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
@@ -89,6 +91,7 @@ def delete_user(
     current_user=Depends(get_current_user)
 ):
     if current_user.role != "admin":
+        log_action(db, current_user.id, "Delete user : access_forbidden")
         raise HTTPException(status_code=403, detail="Access forbidden")
     
     user = db.query(UserModel).filter(UserModel.id == user_id).first()

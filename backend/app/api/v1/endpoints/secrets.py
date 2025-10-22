@@ -56,7 +56,8 @@ def get_all_secrets(
 ):
     """Get all secrets"""
     if current_user.role == "admin": secrets = db.query(Secret).all()
-    elif current_user.role == "developer": secrets = db.query(Secret).filter(Secret.owner_id == current_user.id).all()
+    elif current_user.role == "developer": 
+        secrets = db.query(Secret).filter(Secret.owner_id == current_user.id).all()
     else:
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -120,7 +121,8 @@ def update_secret(
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
 
-    if current_user.role != "admin" and secret.owner_id != current_user.id:
+    if current_user.role != "admin":
+        log_action(db, current_user.id, f"unauthorized_update_attempt ({secret.name})")
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if secret_data.value is not None:
@@ -154,6 +156,7 @@ def delete_secret(
         raise HTTPException(status_code=404, detail="Secret not found")
     
     if current_user.role != "admin":
+        log_action(db, current_user.id, f"unauthorized_delete_attempt ({secret.name})")
         raise HTTPException(status_code=403, detail="Not authorized to delete this secret")
     
     db.delete(secret)

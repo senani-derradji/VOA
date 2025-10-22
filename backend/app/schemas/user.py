@@ -1,9 +1,8 @@
 from pydantic import BaseModel, Field, validator
-from enum import Enum
 from fastapi import HTTPException
 
 class UserBase(BaseModel):
-    username: str = Field(min_length=10, max_length=26)
+    username: str = Field(min_length=5, max_length=10)
     role: str
 
     @validator("username")
@@ -26,15 +25,23 @@ class UserCreate(UserBase):
 
     @validator("password")
     def validate_password(cls, value):
-        if not any(char.isdigit() for char in value): raise HTTPException(status_code=400, detail="Password must contain at least one digit")
-        if not any(char.isalpha() for char in value): raise HTTPException(status_code=400, detail="Password must contain at least one letter")
-        if not any(char.isupper() for char in value): raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
-        if not any(char.islower() for char in value): raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter")
+        if not any(char.isdigit() for char in value): 
+            raise HTTPException(status_code=400, 
+                                detail="Password must contain at least one digit")
+        
+        if not any(char.isupper() for char in value): 
+            raise HTTPException(status_code=400, 
+                                detail="Password must contain at least one uppercase letter")
+        
+        if not any(char.islower() for char in value): 
+            raise HTTPException(status_code=400, 
+                                detail="Password must contain at least one lowercase letter")
+        
         return value
 
 
 class UserOut(UserBase):
-    id: int = Field(gt=0)
+    id: int
     
     class Config:
         from_attributes = True

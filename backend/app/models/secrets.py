@@ -8,8 +8,8 @@ class SecretsModel(Base):
     __tablename__ = "secrets_table"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(10), index=True)
-    value = Column(String)
+    name = Column(String(50), index=True)
+    value = Column(String(512))
     environment = Column(String(4), default="dev")
     created_at = Column(DateTime, default=datetime.utcnow)
     

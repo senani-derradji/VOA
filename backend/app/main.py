@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.api import api_router
 # from fastapi.staticfiles import StaticFiles
 # from fastapi.responses import FileResponse
-# from app.api.v1.endpoints import auth, secrets
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -17,6 +16,7 @@ tags_metadata = [
     {"name": "Auth", "description": "Authentication and token operations."},
     {"name": "Users", "description": "User registration and management."},
     {"name": "Secrets", "description": "CRUD operations for secrets."},
+    {"name": "Logs", "description": "Access and manage audit logs."},
 ]
 
 app = FastAPI(
@@ -69,7 +69,6 @@ if not logger.hasHandlers():
     logger.addHandler(file_handler)
 
 
-# Prometheus Exporter
 instrumentator = Instrumentator()
 instrumentator.instrument(app).expose(app)
 
