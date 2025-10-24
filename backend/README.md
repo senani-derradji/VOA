@@ -1,10 +1,9 @@
 # VOA Secrets Manager API
 
-![VOA Architecture](https://i.pinimg.com/736x/39/79/14/39791480b4e863e3ffdf6f1c642c590d.jpg)
-
 A secure and robust API for managing secrets, users, and audits. Built with **FastAPI**, **SQLAlchemy**, **Alembic**, and Docker-ready for deployment.
 
 ---
+![VOA Architecture](https://i.pinimg.com/736x/39/79/14/39791480b4e863e3ffdf6f1c642c590d.jpg)
 
 ## Table of Contents
 - [Features](#features)
