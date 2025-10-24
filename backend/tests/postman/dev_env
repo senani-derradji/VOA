@@ -1,0 +1,38 @@
+{
+  "id": "3b561992-03d2-4db6-adaa-08d3ab21c74a",
+  "name": "developer_env",
+  "values": [
+    {
+      "key": "dev_user",
+      "value": "devinderradji",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "dev_pass",
+      "value": "Dev@PassWord.1+1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "dev_access_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "secretID",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-10-23T03:15:00.000Z",
+  "_postman_exported_using": "Postman/11.66.5"
+}

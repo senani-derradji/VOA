@@ -8,7 +8,10 @@ from app.core.encryption import encrypt, decrypt
 from app.services.audit import log_action
 from app.schemas.secrets import (SecretsUpdate, 
                                  SecretsCreate)
+from app.utils.logging_logs import get_logger
 
+
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -27,6 +30,7 @@ def create_secret(
     value = data_form.value
 
     if db.query(Secret).filter_by(name=name).first():
+        log_action(db, current_user.id, f"secret_exists ({name})")
         raise HTTPException(status_code=400, detail="Secret name already exists")
 
     encrypted_value = encrypt(value)
@@ -40,7 +44,9 @@ def create_secret(
     db.commit()
     db.refresh(new_secret)
 
-    log_action(db, current_user.id, f"create_secret ({new_secret.name})")
+    log_action(db, current_user.id, f"create_secret")
+    logger.info(f"Secret created: {new_secret.name}")
+
     return {"message": "Secret created successfully", "secret_id": new_secret.id}
 
 
@@ -54,9 +60,10 @@ def get_all_secrets(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get all secrets"""
-    if current_user.role == "admin": secrets = db.query(Secret).all()
-    elif current_user.role == "developer": 
+    if current_user.role == "admin": 
+        logger.info(f"Admin {current_user.username} user accessing secrets")
+        secrets = db.query(Secret).all()
+    elif current_user.role == "developer":
         secrets = db.query(Secret).filter(Secret.owner_id == current_user.id).all()
     else:
         raise HTTPException(status_code=403, detail="Access denied")
@@ -96,7 +103,9 @@ def get_secret(
         raise HTTPException(status_code=403, detail="Not authorized to view this secret")
     
 
-    log_action(db, current_user.id, f"read_secret ({secret.name})")
+    log_action(db, current_user.id, f"read_secret")
+    logger.info(f"Secret accessed: {secret.name}")
+
 
     return {
         "id": secret.id,
@@ -122,7 +131,7 @@ def update_secret(
         raise HTTPException(status_code=404, detail="Secret not found")
 
     if current_user.role != "admin":
-        log_action(db, current_user.id, f"unauthorized_update_attempt ({secret.name})")
+        logger.warning(f"{current_user.username} Tried to update Secret {secret.name}")
         raise HTTPException(status_code=403, detail="Not authorized")
     
     if secret_data.value is not None:
@@ -134,7 +143,9 @@ def update_secret(
 
     db.commit()
     db.refresh(secret)
-    log_action(db, current_user.id, f"update_secret ({secret.name})")
+    log_action(db, current_user.id, f"update_secret")
+    logger.info(f"{current_user.username} updated Secret : {secret.name}")
+
 
     return {"message": "Secret updated successfully"}
 
@@ -156,12 +167,12 @@ def delete_secret(
         raise HTTPException(status_code=404, detail="Secret not found")
     
     if current_user.role != "admin":
-        log_action(db, current_user.id, f"unauthorized_delete_attempt ({secret.name})")
+        logger.warning(f"{current_user.username} Tried to delete Secret {secret.name}")
         raise HTTPException(status_code=403, detail="Not authorized to delete this secret")
     
     db.delete(secret)
     db.commit()
-    log_action(db, current_user.id, f"delete_secret ({secret.name})")
-
+    log_action(db, current_user.id, f"delete_secret")
+    logger.info(f"{current_user.username} deleted Secret : {secret.name}")
 
     return {"message": "Secret deleted successfully"}

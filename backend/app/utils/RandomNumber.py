@@ -1,2 +1,2 @@
 import random
-random_integer = str(random.randint(3, 50))
+random_integer = random.randint(5, 10)

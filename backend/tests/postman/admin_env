@@ -1,0 +1,27 @@
+{
+	"id": "34cc2e0b-5361-4eeb-93fe-6869247e937b",
+	"name": "admin_env",
+	"values": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "admin_user",
+			"value": "adminderradji",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "admin_pass",
+			"value": "Admin@PassWord.1+1",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-10-23T09:45:00.512Z",
+	"_postman_exported_using": "Postman/11.68.2"
+}

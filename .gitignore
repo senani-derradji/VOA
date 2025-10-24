@@ -8,6 +8,8 @@ venv/
 env/
 .venv/
 env.yaml
+.env
+.*env
 
 
 
@@ -24,7 +26,7 @@ __pycache__/
 # SQLite or local databases
 *.db
 *.sqlite3
-backend/SMA.db
+*.dump
 
 
 # Local environment files

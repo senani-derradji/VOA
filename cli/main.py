@@ -1,11 +1,15 @@
 import click, getpass, os, datetime, requests as re
+from dotenv import load_dotenv
+import redis, json
+
 
 main_api = "api/v1"
 login_api = "auth/login"
 secrets_api = ["secrets/create", "secrets/", "secrets/"]
 users_api = ["users/register", "users/"]
 TOKEN_FILE = ".env"
-URL_MAIN = "http://voa.local"
+
+for URL in ["http://localhost/docs", "http://voa.local/docs"]: URL_MAIN = URL if re.get(URL).status_code == 200 else click.echo("SERVER IS DOWN")
 
 
 def show_banner():
@@ -195,6 +199,99 @@ def manage(upuser, deluser):
         except Exception as e: click.echo(click.style(f"An error occurred: {e}", fg="red")); return
         if response.status_code == 200: click.echo(click.style(f"User {deluser} deleted successfully.",fg="green"))
         else: click.echo(response.text)
+
+
+
+@cli.command()
+@click.option("--user", type=str, help="Get tokens of a specific user")
+@click.option("--all-tokens", is_flag=True, help="Get all tokens")
+@click.option("--revoke", is_flag=True, help="Revoke all access tokens")
+def tokens(user, all_tokens, revoke):
+
+    load_dotenv()
+    REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "derradji")
+    REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+    REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+
+    try:
+        redis_client = redis.Redis(
+            host=REDIS_HOST,
+            port=REDIS_PORT,
+            db=0,
+            password=REDIS_PASSWORD,
+            decode_responses=True
+        )
+
+        keys = redis_client.keys("access_token:*")
+        if not keys:
+            click.echo(click.style("No access tokens found.", fg="yellow"))
+            return
+
+        if revoke:
+            for key in keys:
+
+                redis_client.delete(key)
+            click.echo(click.style("All access tokens have been revoked.", fg="green"))
+            return
+
+        if all_tokens:
+            click.echo(click.style(f"Found {len(keys)} access tokens:\n", fg="cyan"))
+            for key in keys:
+                data = redis_client.get(key)
+                if not data:
+                    continue
+                try:
+                    token_data = json.loads(data)
+                    username = token_data.get("username", "unknown")
+                    role = token_data.get("role", "unknown")
+                    created_at = token_data.get("created_at", "unknown")
+                    access_token = key.split(":")[1]
+
+                    click.echo(click.style(f"Username: {username}", fg="green"))
+                    click.echo(click.style(f"Role: {role}", fg="yellow"))
+                    click.echo(click.style(f"Created: {created_at}", fg="cyan"))
+                    click.echo(click.style(f"Access Token: {access_token}\n", fg="blue"))
+                except json.JSONDecodeError:
+                    click.echo(click.style(f"Invalid JSON in key: {key}", fg="red"))
+            return
+
+        if user:
+            found = False
+            for key in keys:
+                data = redis_client.get(key)
+                if not data:
+                    continue
+                try:
+                    token_data = json.loads(data)
+                    username = token_data.get("username")
+                    if username == user:
+                        access_token = key.split(":")[1]
+                        click.echo(click.style(f"Username: {username}", fg="green"))
+                        click.echo(click.style(f"Access Token: {access_token}\n", fg="blue"))
+                        found = True
+                except json.JSONDecodeError:
+                    continue
+            if not found:
+                click.echo(click.style(f"No token found for user: {user}", fg="yellow"))
+
+    except Exception as e:
+        click.echo(click.style(f"An error occurred: {e}", fg="red"))
+
+@cli.command()
+@click.option("--path", prompt=True, type=str, help="Path you want to save the backup to", default=f"{os.getcwd()}")
+def backup(path):
+    load_dotenv()
+    DB_USER = os.getenv("DB_USER", "postgres")
+    DB_NAME = os.getenv("DB_NAME", "VOA")
+
+    if os.path.exists(path.replace('/','\\')):
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d")
+        cmd = os.system(f"docker exec -t voa-db pg_dump -U {DB_USER} -d {DB_NAME} > {path}/backup.sql")
+        os.system(f"docker exec -t voa-db pg_dump -U {DB_USER} -d {DB_NAME} -F c -f /tmp/backup.dump && docker cp voa-db:/tmp/backup.dump {path}\\backup.dump")
+        print(cmd)
+        click.echo(click.style(f"Backup saved to {path}/{timestamp}_backup.sql",fg="green"))
+    else: click.echo(click.style("Path does not exist.",fg="red"))
+
 
 if __name__ == "__main__":
     cli()

@@ -1,29 +1,33 @@
-import subprocess
-import sys
 import os
 
-dependencies = [
-    ["docker", "--version"],
-    ["docker", "compose", "version"],
-]
+DIR = os.getcwd()
+ENV_FILE = '.env'
 
-def sys_type():
-    return "windows" if sys.platform.startswith("win") else "linux"
+PATHS = {
+    "BACKEND": os.path.join(DIR, "backend"),
+    "CLI": os.path.join(DIR, "cli"),
+    "HERE": DIR
+}
 
-def check_dependency(cmd_list):
-    try:
-        subprocess.run(cmd_list, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return True
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return False
+DATA = {
+    "DB_USER": "derradji",
+    "DB_PASSWORD": "derradji95",
+    "DB_NAME": "SMV",
+    "REDIS_HOST": "redis",
+    "REDIS_PASSWORD": "0@192@300@53@3493@3.14",
+    "REDIS_PORT": "6379",
+    "REDIS_DB": "0",
+    "DATABASE_URL": "postgresql://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}",
+    "SECRET_KEY": "OSJ7MD5T5O",
+    "ALGORITHM": "HS256",
+    "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+}
 
-for dep in dependencies:
-    if not check_dependency(dep):
-        dep_name = " ".join(dep[:-1]) if len(dep) > 1 else dep[0]
-        print(f"Missing dependency: {dep_name}")
-        if sys_type() == "linux":
-            print(f"Run: sudo apt install {dep_name}")
-        else:
-            print(f"Please install {dep_name} manually for Windows.")
-    else:
-        print(f"{dep[0]} installed")
+for name, path in PATHS.items():
+    os.makedirs(path, exist_ok=True)
+    env_path = os.path.join(path, ENV_FILE)
+    with open(env_path, "w") as file:
+        for k, v in DATA.items():
+            file.write(f"{k}={v}\n")
+    print(f"{env_path} created successfully.")
+

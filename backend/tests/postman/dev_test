@@ -1,0 +1,411 @@
+{
+    "info" ; {
+        "_postman_id"; "138f0bb6-f0a6-4dcc-8b20-1a6c4a440bac",
+        "name"; "Developer Collection",
+        "schema"; "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id"; "49135455",
+        "_collection_link"; "https://derradjisenani05-8827108.postman.co/workspace/Derradji-B76f's-Workspace~6beed056-ae3d-4ae6-814c-820aa550fac5/collection/49135455-138f0bb6-f0a6-4dcc-8b20-1a6c4a440bac?action=share&source=collection_link&creator=49135455"
+    };
+    
+    "item" ; [
+        {
+            "name": "Login",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Login successful\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "try {",
+                            "    const responseData = pm.response.json();",
+                            "    if (responseData.access_token) {",
+                            "        pm.environment.set('dev_access_token', responseData.access_token);",
+                            "        console.log('Access token saved:', responseData.access_token);",
+                            "    } else {",
+                            "        console.log('No access token found in response');",
+                            "    }",
+                            "} catch (e) {",
+                            "    console.log('Error parsing JSON:', e);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/x-www-form-urlencoded"
+                    }
+                ],
+                "body": {
+                    "mode": "urlencoded",
+                    "urlencoded": [
+                        {
+                            "key": "username",
+                            "value": "{{dev_user}}",
+                            "type": "text"
+                        },
+                        {
+                            "key": "password",
+                            "value": "{{dev_pass}}",
+                            "type": "text"
+                        }
+                    ]
+                },
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/auth/login",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "login"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Secrets List",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{dev_access_token}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/secrets/",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "secrets",
+                        ""
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Create Secret",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "exec": [
+                            "function randomString(length) {",
+                            "    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';",
+                            "    let result = '';",
+                            "    for (let i = 0; i < length; i++) {",
+                            "        result += chars.charAt(Math.floor(Math.random() * chars.length));",
+                            "    }",
+                            "    return result;",
+                            "}",
+                            "",
+                            "pm.environment.set('random_secret_name', 'DEV_' + randomString(5));"
+                        ],
+                        "type": "text/javascript"
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Create Secret - Success if 40x status\", function () {",
+                            "    pm.expect(pm.response.code).to.be.within(400, 499);",
+                            "});",
+                            "",
+                            "if (pm.response.code >= 400 && pm.response.code <= 499) {",
+                            "    console.log('✅ Expected behavior - Developer cannot create secrets');",
+                            "} else {",
+                            "    console.log('❌ Unexpected status code:', pm.response.code);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{dev_access_token}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"{{random_secret_name}}\",\n    \"value\": \"PASSdz.12@\",\n    \"environment\": \"dev\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/secrets/create",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "secrets",
+                        "create"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Specific Secret",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Get Specific Secret \", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "if (pm.response.code == 200) {",
+                            "    console.log('✅ Expected behavior - Developer cannot access specific secrets');",
+                            "} else {",
+                            "    console.log('❌ Unexpected status code:', pm.response.code);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{dev_access_token}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/secrets/{{secretID}}",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "secrets",
+                        "{{secretID}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update Secret",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Update Secret - Success if 40x status\", function () {",
+                            "    pm.expect(pm.response.code).to.be.within(400, 499);",
+                            "});",
+                            "",
+                            "if (pm.response.code >= 400 && pm.response.code <= 499) {",
+                            "    console.log('✅ Expected behavior - Developer cannot update secrets');",
+                            "} else {",
+                            "    console.log('❌ Unexpected status code:', pm.response.code);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{dev_access_token}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"UPDATED_SECRET_DEV\",\n    \"value\": \"UPDATED_VALUE_DEV\",\n    \"environment\": \"dev\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/secrets/{{secretID}}",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "secrets",
+                        "{{secretID}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Secret",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Delete Secret - Success if 40x status\", function () {",
+                            "    pm.expect(pm.response.code).to.be.within(400, 499);",
+                            "});",
+                            "",
+                            "if (pm.response.code >= 400 && pm.response.code <= 499) {",
+                            "    console.log('✅ Expected behavior - Developer cannot delete secrets');",
+                            "} else {",
+                            "    console.log('❌ Unexpected status code:', pm.response.code);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{dev_access_token}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/secrets/{{secretID}}",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "secrets",
+                        "{{secretID}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Access Users List",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Access Users List - Success if 40x status\", function () {",
+                            "    pm.expect(pm.response.code).to.be.within(400, 499);",
+                            "});",
+                            "",
+                            "if (pm.response.code >= 400 && pm.response.code <= 499) {",
+                            "    console.log('✅ Expected behavior - Developer cannot access users list');",
+                            "} else {",
+                            "    console.log('❌ Unexpected status code:', pm.response.code);",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{dev_access_token}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{BASE_URL}}/api/v1/users/",
+                    "host": [
+                        "{{BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "users",
+                        ""
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

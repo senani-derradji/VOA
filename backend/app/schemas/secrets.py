@@ -24,6 +24,10 @@ class SecretsUpdate(BaseModel):
     name: str  = None
     value: str = None
     environment: str = None
+    @validator("environment")
+    def Validate_environment(cls, environment):
+        if environment not in ["dev", "test", "prod"]: HTTPException("environment should be just : dev or test or prod")
+
 
 class SecretsOut(BaseModel):
     id: int

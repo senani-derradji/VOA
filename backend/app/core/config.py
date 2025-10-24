@@ -21,8 +21,3 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
 
 settings = Settings()
-
-# print(settings.DATABASE_URL)
-# print(settings.SECRET_KEY)
-# print(settings.ALGORITHM)
-# print(settings.ACCESS_TOKEN_EXPIRE_MINUTES)

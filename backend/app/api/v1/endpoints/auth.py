@@ -20,6 +20,9 @@ from jose import jwt, JWTError
 from app.core.redis_client import redis_client
 import json
 from datetime import datetime
+from app.utils.logging_logs import get_logger
+
+logger = get_logger(__name__)
 
 
 router = APIRouter()
@@ -38,9 +41,11 @@ async def login(request: Request,
           ):
     user = db.query(UserModel).filter(UserModel.username == form_data.username).first()
     if not user:
+        logger.error(f"User not found: {form_data.username}")
         raise HTTPException(status_code=404, detail="User not found")
         
     if not user or not verify_password(form_data.password, user.password):
+        logger.error(f"Invalid credentials: {form_data.username}")
         raise HTTPException(status_code=401, detail=f"Invalid credentials")
     
     access_token_expires = timedelta(minutes=30)
@@ -50,6 +55,7 @@ async def login(request: Request,
     refresh_token = create_refresh_token({"sub": user.username, "role": user.role}, refresh_token_expires)
 
     log_action(db, user.id, "login")
+    logger.info(f"User logged in: {user.username}")
 
     token_data = {
         "username": user.username,

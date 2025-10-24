@@ -3,6 +3,7 @@ import base64
 from app.core.security import SEC_KEY
 
 key = base64.urlsafe_b64encode(SEC_KEY.encode().ljust(32, b'0'))
+
 fernet = Fernet(key)
 
 def encrypt(value: str) -> str:
