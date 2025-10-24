@@ -34,7 +34,7 @@ jobs:
 
         - name: Build and start services
           run: |
-            docker-compose up --build
+            docker-compose up -d database redis backend nginx
         
         # - name: Run backend tests
         #   run: |
@@ -51,10 +51,13 @@ jobs:
         - name: Install Newman
           run: npm install -g newman
 
-        - name: Run Postman Collection with Newman
+        - name: Run admin Test with Newman
           run: |
             cd backend/tests/postman
             newman run admin_test -e admin_env
+        - name: run dev Test with newman
+          run: |
+            cd backend/tests/postman
             newman run dev_test -e dev_env
         # -------------------------------------------
     
