@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-echo "---------------------------------------- start .sh --------------------------------------------"
 
 echo "Running alembic migrations..."
 alembic upgrade head && sleep 5 && python db_test.py

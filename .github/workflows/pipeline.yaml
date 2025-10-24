@@ -1,0 +1,19 @@
+name: CI PIPELINE
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+    # --------------------------------------
+    CoreSecScan:
+      uses: ./.github/workflows/security.yml
+    # --------------------------------------
+
+    # --------------------------------------
+    Tests:
+        # needs: CoreSecScan
+        uses: ./.github/workflows/SmokeTests.yaml
+    # --------------------------------------

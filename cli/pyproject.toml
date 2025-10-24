@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dvoa-cli"
+version = "1.0"
+description = "VOA CLI Tool : Just a frontend of VOA API https://gthub.com/senani-derradji/VOA"
+readme = "README.md"
+authors = [
+  { name="Derradji Senani" }
+]
+requires-python = ">=3.9"
+dependencies = [
+  "click>=8.0",
+  "python-dotenv",
+  "redis",
+]
+
+[project.scripts]
+voa = "main:cli"

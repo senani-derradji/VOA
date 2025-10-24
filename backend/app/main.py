@@ -1,21 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.api import api_router
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-# from app.api.v1.endpoints import auth, secrets
+# from fastapi.staticfiles import StaticFiles
+# from fastapi.responses import FileResponse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 import logging
 from fastapi import Request
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 tags_metadata = [
     {"name": "Auth", "description": "Authentication and token operations."},
     {"name": "Users", "description": "User registration and management."},
     {"name": "Secrets", "description": "CRUD operations for secrets."},
+    {"name": "Logs", "description": "Access and manage audit logs."},
 ]
 
 app = FastAPI(
@@ -29,6 +30,7 @@ app = FastAPI(
         "Email": "derradjisn@gmail.com"
     },
 )
+
 
 
 @app.get("/health")
@@ -56,7 +58,6 @@ app.add_middleware(
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
-
 logger = logging.getLogger("blocked_ips")
 logger.setLevel(logging.INFO)
 
@@ -66,6 +67,11 @@ file_handler.setFormatter(formatter)
 
 if not logger.hasHandlers():
     logger.addHandler(file_handler)
+
+
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):

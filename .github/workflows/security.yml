@@ -1,0 +1,46 @@
+name: Security Scan
+
+on:
+  workflow_call:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Security Tools
+        run: |
+          pip install safety bandit
+
+      - name: Python Dependency & Code Scan
+        run: |
+          safety check -r backend/requirements.txt > safety_report.txt || true
+          bandit -r backend/ -lll > bandit_report.txt || true
+          echo "---- SAFETY REPORT ----"
+          cat safety_report.txt
+          echo "---- BANDIT REPORT ----"
+          cat bandit_report.txt
+    
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            safety_report.txt
+            bandit_report.txt
+
+      - name: Policy Gate
+        run: |
+            if grep -E "CRITICAL|HIGH" bandit_report.txt; then
+               echo "security Checks Failed"
+               exit 1
+            else
+               echo "security Checks Passed"
+            fi

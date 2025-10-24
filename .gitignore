@@ -8,6 +8,8 @@ venv/
 env/
 .venv/
 env.yaml
+.env
+.*env
 
 
 
@@ -15,7 +17,6 @@ env.yaml
 __pycache__/
 *.py[cod]
 *$py.class
-db_test.py
 .pytest_cache/
 .mypy_cache/
 .coverage
@@ -25,7 +26,7 @@ db_test.py
 # SQLite or local databases
 *.db
 *.sqlite3
-backend/SMA.db
+*.dump
 
 
 # Local environment files
@@ -100,4 +101,4 @@ app/static/dist/
 __MACOSX/
 blocked_ips.log
 certs/
-.github/*
+# .github/*

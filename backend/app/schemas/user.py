@@ -1,16 +1,47 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
+from fastapi import HTTPException
 
 class UserBase(BaseModel):
-    username: str
-
-class UserCreate(BaseModel):
-    username: str
-    password: str
-    role: str = "user"
-
-class UserOut(BaseModel):
-    username: str
+    username: str = Field(min_length=5, max_length=10)
     role: str
+
+    @validator("username")
+    def validate_username(cls, value):
+        if any(char.isupper() for char in value): 
+            raise HTTPException(status_code=400, detail="Username cannot contain uppercase letters")
+        if not any(char.isalnum() for char in value): 
+            raise HTTPException(status_code=400, detail="Username can only contain letters and numbers")
+        return value
+    
+    @validator("role")
+    def validate_role(cls, value):
+        if value not in ["admin", "developer"]: 
+            raise HTTPException(status_code=400, detail="Invalid role")
+        return value
+
+
+class UserCreate(UserBase):
+    password: str
+
+    @validator("password")
+    def validate_password(cls, value):
+        if not any(char.isdigit() for char in value): 
+            raise HTTPException(status_code=400, 
+                                detail="Password must contain at least one digit")
+        
+        if not any(char.isupper() for char in value): 
+            raise HTTPException(status_code=400, 
+                                detail="Password must contain at least one uppercase letter")
+        
+        if not any(char.islower() for char in value): 
+            raise HTTPException(status_code=400, 
+                                detail="Password must contain at least one lowercase letter")
+        
+        return value
+
+
+class UserOut(UserBase):
+    id: int
     
     class Config:
         from_attributes = True
