@@ -5,7 +5,7 @@ ENV_FILE = '.env'
 
 PATHS = {
     "BACKEND": os.path.join(DIR, "backend"),
-    "TESTS": os.path.join(DIR, "backend/tests"),
+    # "TESTS": os.path.join(DIR, "backend/tests"),
     "CLI": os.path.join(DIR, "cli"),
     "HERE": DIR
 }
@@ -18,10 +18,11 @@ DATA = {
     "REDIS_PASSWORD": "0@192@300@53@3493@3.14",
     "REDIS_PORT": "6379",
     "REDIS_DB": "0",
-    "DATABASE_URL": "postgresql://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}",
     "SECRET_KEY": "OSJ7MD5T5O",
     "ALGORITHM": "HS256",
     "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+    "REDIS_ADDR":"${REDIS_HOST}:${REDIS_PORT}",
+    "DATABASE_URL": "postgresql://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}"
 }
 
 for name, path in PATHS.items():

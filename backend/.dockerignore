@@ -1,5 +1,0 @@
-*.db
-*.log
-*__pycache__
-certs
-.pytest*

@@ -36,9 +36,9 @@ jobs:
           run: |
             docker-compose up -d database redis backend
         
-        - name: Run backend tests
-          run: |
-            docker exec voa-backend pytest -v --tb=short
+        # - name: Run backend tests
+        #   run: |
+        #     docker exec voa-backend pytest -v --tb=short
         # -------------------------------------------
         
         

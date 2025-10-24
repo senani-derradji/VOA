@@ -1,2 +1,2 @@
 import random
-random_integer = random.randint(5, 10)
+random_integer = random.randint(15, 30)
