@@ -145,6 +145,11 @@
 "    pm.response.to.have.status(200);",
 "});",
 "",
+"if (pm.response.code == 200 ) {",
+"    console.log('secret Created successfully');",
+"} else {",
+"    console.log('Unexpected status code:', pm.response.code);",
+"}"
                         ],
                         "type": "text/javascript"
                     }
