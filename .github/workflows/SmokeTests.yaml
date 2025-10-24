@@ -40,23 +40,11 @@ jobs:
         - name: Run admin Test with Newman
           run: |
             cd backend/tests/postman
-            newman run admin_test -e admin_env \
-            --reporters cli,json \
-            --reporter-json-export admin_report.json
-
+            newman run admin_test -e admin_env 
         - name: run dev Test with newman
           run: |
             cd backend/tests/postman
-            newman run dev_test -e dev_env \
-            --reporters cli,json \
-            --reporter-json-export dev_report.json
-
-        - name: Upload Newman Reports
-          uses: actions/upload-artifact@v4
-          with:
-            name: newman-reports
-            path: |
-                backend/tests/postman/*_report.json
+            newman run dev_test -e dev_env
         # -------------------------------------------
     
         - name: Shutdown services
