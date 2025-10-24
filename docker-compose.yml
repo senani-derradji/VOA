@@ -80,7 +80,6 @@ services:
       - backnet
       - frontnet
 
-
   nginx:
     image: nginx:alpine
     container_name: voa-nginx
@@ -159,8 +158,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-
-
 
   redis-exporter:
     image: oliver006/redis_exporter:latest

@@ -134,8 +134,7 @@ pytest -v
 
 - **Postman:**  
 The `tests/postman/` directory contains collections for testing the API endpoints.
+```bash
 cd tests/postman/ && newman run admin_test -e admin_env
 cd tests/postman/ && newman run dev_test -e dev_env
 ```
-
----
