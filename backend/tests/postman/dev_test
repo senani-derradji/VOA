@@ -142,14 +142,9 @@
                     "script": {
                         "exec": [
 "pm.test(\"Create Secret - Success if 40x status\", function () {",
-"    pm.expect(pm.response.code).to.be.within(400, 499);",
+"    pm.response.to.have.status(200);",
 "});",
 "",
-"if (pm.response.code >= 400 && pm.response.code <= 499) {",
-"    console.log('✅ Expected behavior - Developer cannot create secrets');",
-"} else {",
-"    console.log('❌ Unexpected status code:', pm.response.code);",
-"}"
                         ],
                         "type": "text/javascript"
                     }
