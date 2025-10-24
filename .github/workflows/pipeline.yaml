@@ -34,7 +34,7 @@ jobs:
 
         - name: Build and start services
           run: |
-            docker-compose up -d database redis backend nginx
+            docker-compose up --build
         
         # - name: Run backend tests
         #   run: |
