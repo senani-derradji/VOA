@@ -47,7 +47,7 @@ jobs:
         - name: run dev Test with newman
           run: |
             cd backend/tests/postman
-            newman run dev_test.json -e dev_env.json \
+            newman run dev_test -e dev_env \
             --reporters cli,json \
             --reporter-json-export dev_report.json
 
