@@ -12,55 +12,8 @@ jobs:
       uses: ./.github/workflows/security.yml
     # --------------------------------------
 
-    tests_and_build:
+    # --------------------------------------
+    Tests:
         needs: CoreSecScan
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v4
-        
-
-        # -------------------------------------------
-        - name: Set up Python 3.9
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.9'
-        
-        - name: Create .env's
-          run: python install.py
-
-        - name: Install Docker Compose
-          run: |
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
-
-        - name: Build and start services
-          run: |
-            docker-compose up -d database redis backend nginx
-        
-        # - name: Run backend tests
-        #   run: |
-        #     docker exec voa-backend pytest -v --tb=short
-        # -------------------------------------------
-        
-        
-        # -------------------------------------------
-        - name: Set up Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: '18'
-
-        - name: Install Newman
-          run: npm install -g newman
-
-        - name: Run admin Test with Newman
-          run: |
-            cd backend/tests/postman
-            newman run admin_test -e admin_env
-        - name: run dev Test with newman
-          run: |
-            cd backend/tests/postman
-            newman run dev_test -e dev_env
-        # -------------------------------------------
-    
-        - name: Shutdown services
-          run: |
-            docker-compose down -v
+        uses: ./.github/workflows/SmokeTests.yaml
+    # --------------------------------------

@@ -1,0 +1,65 @@
+name: Smoke Tests
+
+on:
+  workflow_call:
+
+jobs:
+  Postman:
+    runs-on: ubuntu-latest
+
+    steps:
+        - uses: actions/checkout@v4
+
+        # -------------------------------------------
+        - name: Set up Python 3.9
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.9'
+        
+        - name: Create .env's
+          run: python install.py
+
+        - name: Install Docker Compose
+          run: |
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
+
+        - name: Build and start services
+          run: |
+            docker-compose up -d database redis backend nginx
+        # -------------------------------------------
+
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '18'
+
+      # -------------------------------------------
+        - name: Install Newman
+          run: npm install -g newman
+
+        - name: Run admin Test with Newman
+          run: |
+            cd backend/tests/postman
+            newman run admin_test -e admin_env \
+            --reporters cli,json \
+            --reporter-json-export admin_report.json
+
+        - name: run dev Test with newman
+          run: |
+            cd backend/tests/postman
+            newman run dev_test.json -e dev_env.json \
+            --reporters cli,json \
+            --reporter-json-export dev_report.json
+
+        - name: Upload Newman Reports
+          uses: actions/upload-artifact@v4
+          with:
+            name: newman-reports
+            path: |
+                backend/tests/postman/*_report.json
+        # -------------------------------------------
+    
+        - name: Shutdown services
+          run: |
+            docker-compose down -v
+      

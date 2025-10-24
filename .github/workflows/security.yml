@@ -27,12 +27,20 @@ jobs:
           cat safety_report.txt
           echo "---- BANDIT REPORT ----"
           cat bandit_report.txt
+    
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            safety_report.txt
+            bandit_report.txt
 
       - name: Policy Gate
         run: |
-            if grep -E "CRITICAL|HIGH" bandit_report.txt; then
-               echo "security Checks Failed"
-               exit 1
-            else
-               echo "security Checks Passed"
-            fi
+          if grep -iE "CRITICAL|HIGH" bandit_report.txt; then
+            echo "Security checks failed"
+            exit 1
+          else
+            echo "Security checks passed"
+          fi
