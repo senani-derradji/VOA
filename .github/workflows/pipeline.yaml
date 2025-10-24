@@ -8,8 +8,8 @@ on:
 
 jobs:
     # --------------------------------------
-    # CoreSecScan:
-    #   uses: ./.github/workflows/security.yml
+    CoreSecScan:
+      uses: ./.github/workflows/security.yml
     # --------------------------------------
 
     # --------------------------------------
