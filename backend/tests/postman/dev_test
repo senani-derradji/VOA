@@ -1,13 +1,13 @@
 {
-    "info" ; {
-        "_postman_id"; "138f0bb6-f0a6-4dcc-8b20-1a6c4a440bac",
-        "name"; "Developer Collection",
-        "schema"; "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-        "_exporter_id"; "49135455",
-        "_collection_link"; "https://derradjisenani05-8827108.postman.co/workspace/Derradji-B76f's-Workspace~6beed056-ae3d-4ae6-814c-820aa550fac5/collection/49135455-138f0bb6-f0a6-4dcc-8b20-1a6c4a440bac?action=share&source=collection_link&creator=49135455"
-    };
+    "info" : {
+        "_postman_id": "138f0bb6-f0a6-4dcc-8b20-1a6c4a440bac",
+        "name": "Developer Collection",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "49135455",
+        "_collection_link": "https://derradjisenani05-8827108.postman.co/workspace/Derradji-B76f's-Workspace~6beed056-ae3d-4ae6-814c-820aa550fac5/collection/49135455-138f0bb6-f0a6-4dcc-8b20-1a6c4a440bac?action=share&source=collection_link&creator=49135455"
+    },
     
-    "item" ; [
+    "item" : [
         {
             "name": "Login",
             "event": [
@@ -141,15 +141,15 @@
                     "listen": "test",
                     "script": {
                         "exec": [
-                            "pm.test(\"Create Secret - Success if 40x status\", function () {",
-                            "    pm.expect(pm.response.code).to.be.within(400, 499);",
-                            "});",
-                            "",
-                            "if (pm.response.code >= 400 && pm.response.code <= 499) {",
-                            "    console.log('✅ Expected behavior - Developer cannot create secrets');",
-                            "} else {",
-                            "    console.log('❌ Unexpected status code:', pm.response.code);",
-                            "}"
+"pm.test(\"Create Secret - Success if 40x status\", function () {",
+"    pm.expect(pm.response.code).to.be.within(400, 499);",
+"});",
+"",
+"if (pm.response.code >= 400 && pm.response.code <= 499) {",
+"    console.log('✅ Expected behavior - Developer cannot create secrets');",
+"} else {",
+"    console.log('❌ Unexpected status code:', pm.response.code);",
+"}"
                         ],
                         "type": "text/javascript"
                     }
