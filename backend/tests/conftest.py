@@ -12,7 +12,7 @@ random_name = ''.join(random.choices(string.ascii_lowercase, k=10))
 db_path = f"./TEST_VOA_{random_name}.db"
 
 
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", f"sqlite:///{db_path}")
+TEST_DATABASE_URL = f"sqlite:///{db_path}"
 DB_USER=os.getenv("DB_USER", "root")
 DB_PASSWORD=os.getenv("DB_PASSWORD", "root")
 DB_HOST=os.getenv("DB_HOST", "localhost")
