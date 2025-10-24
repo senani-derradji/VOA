@@ -25,8 +25,8 @@ jobs:
           with:
             python-version: '3.9'
         
-        - name: Create .env's
-          run: python install.py
+        # - name: Create .env's
+        #   run: python install.py
 
         - name: Install Docker Compose
           run: |
@@ -34,7 +34,7 @@ jobs:
 
         - name: Build and start services
           run: |
-            docker-compose up -d database redis backend
+            docker-compose up -d database redis backend nginx
         
         # - name: Run backend tests
         #   run: |
