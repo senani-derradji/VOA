@@ -38,9 +38,9 @@ jobs:
 
       - name: Policy Gate
         run: |
-          if grep -iE "CRITICAL|HIGH" bandit_report.txt; then
-            echo "Security checks failed"
-            exit 1
-          else
-            echo "Security checks passed"
-          fi
+            if grep -E "CRITICAL|HIGH" bandit_report.txt; then
+               echo "security Checks Failed"
+               exit 1
+            else
+               echo "security Checks Passed"
+            fi
