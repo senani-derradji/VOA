@@ -12,8 +12,8 @@ pip install dvoa-cli
 
 voa --help
 voa login
-voa secrets list
-voa users list
+voa secrets list , manage
+voa users list , manage
 voa tokens --all-tokens
 voa backup --path ./backups
 
