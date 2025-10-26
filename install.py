@@ -5,7 +5,6 @@ ENV_FILE = '.env'
 
 PATHS = {
     "BACKEND": os.path.join(DIR, "backend"),
-    # "TESTS": os.path.join(DIR, "backend/tests"),
     "CLI": os.path.join(DIR, "cli"),
     "HERE": DIR
 }

@@ -25,13 +25,14 @@ W E L C O M E   {usnm}   T O   V O A
 
 
 @click.group()
-def cli(): show_banner(); pass
+def cli(): pass
 
 
 @cli.command()
 @click.option('-u', type=str , help='Your username')
 @click.option('-p', type=str ,hide_input=True, help='Your password')
 def login(u, p):
+    show_banner()
     username, password = u, p
     URL = f"{URL_MAIN}/{main_api}/{login_api}"
     if not username: username = input("Username: ")
@@ -64,8 +65,9 @@ def secrets(): pass
 @secrets.command()
 def list():
     URL = f"{URL_MAIN}/{main_api}/{secrets_api[1]}"
-    access_token, headers = str(get_token()), {'Authorization': f'Bearer {access_token}'}
-
+    access_token = str(get_token())
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
     response = re.get(URL, headers=headers)
     if response.status_code == 200:
         secrets = response.json()
@@ -85,7 +87,8 @@ def create(n, v):
     if not v: v = click.prompt("Value of the secret", type=str)
 
     URL = f"{URL_MAIN}/{main_api}/{secrets_api[0]}"
-    access_token, headers = str(get_token()), {'Authorization': f'Bearer {access_token}'}
+    access_token = str(get_token())
+    headers = {'Authorization': f'Bearer {access_token}'}
     payload = {"name": n, "value": v}
 
     try: response = re.post(URL, headers=headers, json=payload)
@@ -106,6 +109,7 @@ def manage(usec, dsec, gsec):
 
     access_token = str(get_token())
     headers = {'Authorization': f'Bearer {access_token}'}
+
     if usec:
         payload = {
             "name": click.prompt("New name", type=str, default=None),
@@ -141,7 +145,8 @@ def users(): pass
 @users.command()
 def list():
     URL = f"{URL_MAIN}/{main_api}/{users_api[1]}"
-    access_token, headers = str(get_token()), {'Authorization': f'Bearer {access_token}'}
+    access_token = str(get_token())
+    headers = {'Authorization': f'Bearer {access_token}'}
 
     try: response = re.get(URL, headers=headers)
     except Exception as e: click.echo(click.style(f"An error occurred: {e}",fg="red")); return
@@ -159,7 +164,8 @@ def list():
 def create(u: str = "user", p: str = "password", r: str = "developer"):
 
     URL = f"{URL_MAIN}/{main_api}/{users_api[0]}"
-    access_token, headers = str(get_token()), {'Authorization': f'Bearer {access_token}'}
+    access_token = str(get_token())
+    headers = {'Authorization': f'Bearer {access_token}'}
     payload = {"username": u, "password": p, "role": r}
 
     try: response = re.post(URL, headers=headers, json=payload)

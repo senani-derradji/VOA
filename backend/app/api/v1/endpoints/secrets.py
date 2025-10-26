@@ -96,10 +96,10 @@ def get_secret(
 
     if not secret: raise HTTPException(status_code=404, detail="Secret not found")
 
-    if current_user.role == "admin": decrypted_value = decrypt(secret.value)[:5] + "..."*5
+    if current_user.role == "admin" and current_user.id == secret.owner_id: 
+        decrypted_value = decrypt(secret.value)[:5] + "..."*2
 
     else: 
-        decrypted_value = secret.value
         raise HTTPException(status_code=403, detail="Not authorized to view this secret")
     
 
