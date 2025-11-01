@@ -16,8 +16,7 @@ A full-stack secrets management project including API backend, CLI tool, and mon
 - [License](#license)
 
 ---
-[![VOA Demo](https://img.youtube.com/vi/XALXbmzHZMM/hqdefault.jpg)](https://www.youtube.com/watch?v=XALXbmzHZMM)
-
+[![VOA Demo](https://img.youtube.com/vi/XALXbmzHZMM/hqdefault.jpg)](https://youtu.be/XALXbmzHZMM?si=302Gt9Zp2pOI4pcl)
 ---
 
 ## Project Structure
