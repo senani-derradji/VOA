@@ -7,16 +7,12 @@ from app.models.user import UserModel as User
 from app.core.encryption import encrypt, decrypt
 from app.services.audit import log_action
 from app.schemas.secrets import SecretsUpdate, SecretsCreate
-from app.RBAC.roles import admin_required
+from app.RBAC.roles import admin_required, CEO_required
 from app.utils.logging_logs import get_logger
-from datetime import datetime, timedelta
-
-
+from datetime import datetime
 
 logger = get_logger(__name__)
 router = APIRouter()
-
-
 
 @router.post("/create", summary="Create a new secret")
 def create_secret(
@@ -29,7 +25,7 @@ def create_secret(
     value = data_form.value
 
     if db.query(Secret).filter_by(name=name).first() and db.query(Secret).filter_by(environment=env).first():
-        log_action(db, current_user.id, f"secret_exists ({name})")
+        logger.warning(f"Secret name already exists - {name}")
         raise HTTPException(status_code=400, detail="Secret name already exists")
 
     if current_user.role != "admin":
@@ -56,7 +52,7 @@ def create_secret(
     db.add(new_version)
     db.commit()
 
-    log_action(db, current_user.id, f"create_secret:{name}")
+    log_action(db, current_user.id, f"create_secret")
     logger.info(f"Secret created by {current_user.username} - {name}")
 
     return {"message": "Secret created successfully", "secret_id": new_secret.id, "version": 1}
@@ -100,7 +96,8 @@ def get_secret(
 
     decrypted_value = decrypt(latest_version.value)
 
-    log_action(db, current_user.id, f"read_secret:{secret.name}")
+    log_action(db, current_user.id, f"read_secret")
+    logger.info(f"Secret read by - {current_user.username} - {secret.name}")
     return {
         "id": secret.id,
         "name": secret.name,
@@ -123,23 +120,19 @@ def get_secret_versions(
     if not admin_required(current_user, f"get_secret_versions_{secret.name}") and secret.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    versions = (
-        db.query(SecretVersion)
-        .filter_by(secret_id=secret.id)
-        .order_by(SecretVersion.version_number.desc())
-        .all()
-    )
+    versions = (db.query(SecretVersion).filter_by(secret_id=secret.id).order_by(SecretVersion.version_number.desc()).all())
 
     version_list = [
         {
             "version": v.version_number,
             "created_at": v.created_at,
-            "value_preview": decrypt(v.value)[:4] + "***"
+            "value_preview": decrypt(v.value) if CEO_required(current_user, f"get_secret_versions_{secret.name}") else decrypt(v.value)[:4] + "***"
         }
         for v in versions
     ]
 
-    log_action(db, current_user.id, f"list_versions:{secret.name}")
+    log_action(db, current_user.id, f"list_secrets_versions")
+    logger.info(f"Secret versions listed by - {current_user.username} - {secret.name}")
     return {"secret_id": secret.id, "versions": version_list}
 
 
@@ -174,7 +167,8 @@ def update_secret(
 
     db.commit()
     db.refresh(secret)
-    log_action(db, current_user.id, f"update_secret:{secret.name}")
+    log_action(db, current_user.id, f"update_secret")
+    logger.info(f"Secret updated by - {current_user.username} - {secret.name}")
 
     return {"message": "Secret updated successfully", "new_version": new_version_number}
 
@@ -195,5 +189,7 @@ def delete_secret(
     db.delete(secret) # when the admin delete the main secret , all versions will deleted also (cascade in models relationship)
     db.commit()
 
-    log_action(db, current_user.id, f"delete_secret:{secret.name}")
+    log_action(db, current_user.id, f"delete_secret")
+    logger.info(f"Secret deleted by - {current_user.username} - {secret.name}")
+
     return {"message": f"Secret '{secret.name}' and its versions deleted successfully"}

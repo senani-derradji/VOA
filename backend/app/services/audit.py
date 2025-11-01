@@ -2,14 +2,11 @@ from app.models.audit import AuditModel
 from sqlalchemy.orm import Session
 from app.schemas.audit import Action
 
-def log_action(db: Session, 
+def log_action(db: Session,
                user_id : int,
                action : Action
                ):
-    log = AuditModel(
-        user_id=user_id, 
-        action=action
-        )
+    log = AuditModel(user_id=user_id,action=action)
     try:
         db.add(log)
         db.commit()

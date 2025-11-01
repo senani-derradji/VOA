@@ -11,7 +11,6 @@ logger = get_logger(__name__)
 
 
 def check_TTL(db: Session, model, option: str):
-    """Check for expired secrets and rotate them"""
     now = datetime.utcnow()
     expired_items = db.query(model).filter(model.expired_at <= now).all()
 

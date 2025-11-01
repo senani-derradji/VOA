@@ -18,6 +18,9 @@ admin_password = "ADMIN"
 developer_username = "DEV"
 developer_password = "DEV"
 
+CEO_username = "CEO"
+CEO_password = "CEO"
+
 
 existing_admin = db.query(User).filter(User.username == admin_username).first()
 existing_developer = db.query(User).filter(User.username == developer_username).first()
@@ -32,6 +35,10 @@ else:
     developer = User(username=developer_username,
                password=get_password_hash(developer_password),
                role="developer")
+    ceo = User(username=CEO_username,
+               password=get_password_hash(CEO_password),
+               role="CEO")
+
 
     db.add(admin)
     db.commit()
@@ -41,10 +48,19 @@ else:
     db.commit()
     db.refresh(developer)
 
+    db.add(ceo)
+    db.commit()
+    db.refresh(ceo)
+
     db.close()
 
 print(f"""
+
 \n\nINFO :
+
+    CEO_username: {CEO_username}
+    CEO_password: {CEO_password}
+
 
     ---------
 
