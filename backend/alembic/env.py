@@ -1,38 +1,35 @@
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 from alembic import context
 import os, sys
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
-db_user = os.getenv("DB_USER", "derradji")
-db_pass = os.getenv("DB_PASSWORD", "derradji")
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from app.extentions.database import Base
+
+db_user = os.getenv("DB_USER", "postgres")
+db_pass = os.getenv("DB_PASSWORD", "postgres")
 db_host = os.getenv("DB_HOST", "database")
 db_port = os.getenv("DB_PORT", "5432")
-db_name = os.getenv("DB_NAME", "SMV")
+db_name = os.getenv("DB_NAME", "VOA")
 
-database_url = f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+use_sqlite = os.getenv("USE_SQLITE", "false").lower() == "true"
+sqlite_path = os.getenv("DB_PATH", "./VOA.db")
+
+if use_sqlite:
+    database_url = f"sqlite:///{sqlite_path}"
+else:
+    database_url = f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+
 config.set_main_option("sqlalchemy.url", database_url)
 
-# print("env alembic : ",database_url)
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
+# Logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-print(os.path.dirname(__file__))
-from app.core.database import Base
-
 target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

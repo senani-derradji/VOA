@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.api import api_router
+from sqlalchemy.orm import Session
+import asyncio
 # from fastapi.staticfiles import StaticFiles
 # from fastapi.responses import FileResponse
 from slowapi import Limiter
@@ -10,6 +11,11 @@ from fastapi.responses import JSONResponse
 import logging
 from fastapi import Request
 from prometheus_fastapi_instrumentator import Instrumentator
+
+from app.extentions.database import SessionLocal
+from app.models.secrets import SecretsModel, SecretVersionModel
+from app.models.user import UserModel
+from app.services.check_TTL import check_TTL
 
 
 tags_metadata = [
@@ -84,4 +90,21 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 # app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app.api.api import api_router
+
 app.include_router(api_router, prefix="/api/v1")
+
+async def ttl_background_task():
+    while True:
+        db: Session = SessionLocal()
+        check_TTL(db, SecretsModel, "secret")
+        check_TTL(db, UserModel, "user")
+        db.close()
+        await asyncio.sleep(10)
+
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(ttl_background_task())

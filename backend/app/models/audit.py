@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.extentions.database import Base
 from datetime import datetime
 
 
@@ -11,6 +11,6 @@ class AuditModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users_table.id"))
     action = Column(String, default="create")
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"))
 
     owner = relationship("UserModel", back_populates="audit_logs")

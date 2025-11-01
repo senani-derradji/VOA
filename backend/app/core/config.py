@@ -1,7 +1,11 @@
 import os, sys
 from dotenv import load_dotenv
-from string import Template
 
+defaults = {
+    "HOST": "localhost",
+    "USER": "user",
+    "PASSWORD": "password"
+}
 
 backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(backend_dir)
@@ -9,15 +13,18 @@ sys.path.append(backend_dir)
 load_dotenv()
 
 class Settings:
-    raw_db_url = os.getenv("DATABASE_URL", "sqlite:///./SMA.db")
-    DATABASE_URL = Template(raw_db_url).substitute(
-        USER=os.getenv("DB_USER", "derradji"),
-        HOST=os.getenv("DB_HOST", "localhost"),
-        PASSWORD=os.getenv("DB_PASSWORD", "derradji")
-    )
-    # DATABASE_URL = "sqlite:///./SMA.db"
+    DATABASE_URL = os.getenv("DATABASE_URL", "false")
+    DATABASE_LITE = os.getenv("USE_SQLITE", "false")
+
+    REDIS_HOSTNAME = os.getenv("REDIS_HOSTNAME", defaults["HOST"])
+    REDIS_USERNAME = os.getenv("REDIS_USERNAME", defaults["USER"])
+    REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", defaults["PASSWORD"])
+    REDIS_PORT = os.getenv("REDIS_PORT", 6379)
+
     SECRET_KEY = os.getenv("SECRET_KEY", "derradji_senani")
     ALGORITHM = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
 
 settings = Settings()
+print(settings.DATABASE_URL)
+print(settings.DATABASE_LITE)

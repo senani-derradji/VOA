@@ -1,4 +1,5 @@
-# version: "3.9"
+#version: "3.9"
+
 
 services:
   database:
@@ -46,7 +47,8 @@ services:
       - backnet
     volumes:
       - ./infrastructure/redis/redis.conf:/etc/redis/redis.conf
-  
+
+
   backend:
     build: ./backend
     image: voa-backend:latest
