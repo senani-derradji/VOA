@@ -1,6 +1,5 @@
 from app.models.audit import AuditModel as AUD
 from sqlalchemy.orm import Session
-from app.schemas.audit import Action
 from app.utils.logging_logs import get_logger
 from hashlib import sha256
 
