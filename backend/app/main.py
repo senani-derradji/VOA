@@ -16,6 +16,8 @@ from app.extentions.database import SessionLocal
 from app.models.secrets import SecretsModel, SecretVersionModel
 from app.models.user import UserModel
 from app.services.check_TTL import check_TTL
+from app.core.verify_integrity import verify
+
 
 
 tags_metadata = [
@@ -101,8 +103,9 @@ async def ttl_background_task():
         db: Session = SessionLocal()
         check_TTL(db, SecretsModel, "secret")
         check_TTL(db, UserModel, "user")
+        verify(db)
         db.close()
-        await asyncio.sleep(10)
+        await asyncio.sleep(20)
 
 
 @app.on_event("startup")

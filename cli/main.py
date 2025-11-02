@@ -2,7 +2,6 @@ import click, getpass, os, datetime, requests as re
 from dotenv import load_dotenv
 import redis, json
 
-
 main_api = "api/v1"
 login_api = "auth/login"
 secrets_api = ["secrets/create", "secrets/", "secrets/"]
@@ -37,7 +36,7 @@ def login(u, p):
     URL = f"{URL_MAIN}/{main_api}/{login_api}"
     if not username: username = input("Username: ")
     if not password: password = getpass.getpass("Password: ")
-    
+
     payload = {"username": username, "password": password}
     response = re.post(URL, data=payload)
 
@@ -67,7 +66,7 @@ def list():
     URL = f"{URL_MAIN}/{main_api}/{secrets_api[1]}"
     access_token = str(get_token())
     headers = {'Authorization': f'Bearer {access_token}'}
-    
+
     response = re.get(URL, headers=headers)
     if response.status_code == 200:
         secrets = response.json()
@@ -151,8 +150,8 @@ def list():
     try: response = re.get(URL, headers=headers)
     except Exception as e: click.echo(click.style(f"An error occurred: {e}",fg="red")); return
 
-    if response.status_code == 200: 
-        for user in response.json(): 
+    if response.status_code == 200:
+        for user in response.json():
             click.echo(click.style(f"{user['id']} : {user['username']} : {user['role']}",fg="green"))
     else: click.echo(response.text)
 

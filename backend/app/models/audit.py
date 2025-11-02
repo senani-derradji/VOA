@@ -12,5 +12,6 @@ class AuditModel(Base):
     user_id = Column(Integer, ForeignKey("users_table.id"))
     action = Column(String, default="create")
     timestamp = Column(DateTime, default=datetime.utcnow())
+    integrity_checks = Column(String(512))
 
     owner = relationship("UserModel", back_populates="audit_logs")

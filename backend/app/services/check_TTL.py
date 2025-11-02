@@ -7,6 +7,7 @@ from app.utils.logging_logs import get_logger
 from app.utils.random_data import generate_random_word
 from app.models.secrets import SecretVersionModel
 
+
 logger = get_logger(__name__)
 
 
