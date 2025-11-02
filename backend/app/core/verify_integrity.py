@@ -5,13 +5,11 @@ from hashlib import sha256
 
 logger = get_logger(__name__)
 
-
-
 def verify(db: Session):
     logs = db.query(AUD).order_by(AUD.id).all()
-    previous_hash = "1"
+    previous_hash = "0"
     for log in logs:
-        data = f"{previous_hash}:{log.user_id}:{log.action}"
+        data = f"{str(previous_hash)}:{log.user_id}:{log.action}"
         check = sha256(data.encode()).hexdigest()
         if check != log.integrity_checks:
             logger.warning(f"Integrity broken at log ID {log.id}")
