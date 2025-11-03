@@ -134,17 +134,7 @@ Configuration files are located in `infrastructure/` subfolders.
 The `install.py` script generates `.env` files with default values:
 
 ```
-DB_USER=derradji
-DB_PASSWORD=derradji95
-DB_NAME=SMV
-REDIS_HOST=redis
-REDIS_PASSWORD=0@192@300@53@3493@3.14
-REDIS_PORT=6379
-REDIS_DB=0
-DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}
-SECRET_KEY=OSJ7MD5T5O
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+**** UPDATE IS COMING SOON ****
 ```
 
 Update these values before deploying to production.
