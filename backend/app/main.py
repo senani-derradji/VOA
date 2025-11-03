@@ -1,16 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-import asyncio
+import asyncio, logging, os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
+
 # from fastapi.staticfiles import StaticFiles
 # from fastapi.responses import FileResponse
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
-import logging
 from fastapi import Request
 from prometheus_fastapi_instrumentator import Instrumentator
+
 
 from app.extentions.database import SessionLocal
 from app.models.secrets import SecretsModel, SecretVersionModel
@@ -102,6 +105,7 @@ async def ttl_background_task():
     while True:
         db: Session = SessionLocal()
         check_TTL(db, SecretsModel, "secret")
+
         check_TTL(db, UserModel, "user")
         verify(db)
         db.close()

@@ -7,6 +7,7 @@ from datetime import datetime
 
 
 logger = get_logger(__name__)
+previos_hash = None
 
 def log_action(db: Session, user_id: int, action: Action):
     try:
@@ -16,10 +17,16 @@ def log_action(db: Session, user_id: int, action: Action):
             .order_by(AUD.id.desc())
             .first()
         )
+        print("LAST ENTRY: ________________",last_entry)
 
-        previous_hash = last_entry.integrity_checks if last_entry else "1"
+        # previous_hash = last_entry.integrity_checks if last_entry else "0"
 
-        data = f"{previous_hash}:{str(user_id)}:{action}"
+        if last_entry:
+            previous_hash = last_entry.integrity_checks
+        else:
+            previous_hash = "0"
+
+        data = f"{previous_hash}:{user_id}:{action}"
         integrity_checks_data = sha256(data.encode()).hexdigest()
 
         log = AUD(
@@ -28,7 +35,6 @@ def log_action(db: Session, user_id: int, action: Action):
             timestamp=datetime.utcnow(),
             integrity_checks=integrity_checks_data
         )
-        print(log)
 
         db.add(log)
         db.commit()

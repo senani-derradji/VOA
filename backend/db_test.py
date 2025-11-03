@@ -24,8 +24,9 @@ CEO_password = "CEO"
 
 existing_admin = db.query(User).filter(User.username == admin_username).first()
 existing_developer = db.query(User).filter(User.username == developer_username).first()
+existing_CEO = db.query(User).filter(User.username == CEO_username).first()
 
-if existing_admin and existing_developer: print(f"Admin \ Developer '{admin_username} \ {developer_username} ' already exists.")
+if existing_admin and existing_developer and existing_CEO : print(f"Admin \ Developer '{admin_username} \ {developer_username} ' already exists.")
 else:
     print ("CREATING ADMIN \ DEVELOPER IN PROGESS ....")
 

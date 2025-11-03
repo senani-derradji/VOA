@@ -1,6 +1,5 @@
 import sys, os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.utils.logging_logs import get_logger
@@ -12,6 +11,7 @@ logger = get_logger(__name__)
 
 
 def check_TTL(db: Session, model, option: str):
+
     now = datetime.utcnow()
     expired_items = db.query(model).filter(model.expired_at <= now).all()
 
@@ -38,7 +38,7 @@ def check_TTL(db: Session, model, option: str):
 
         item.value = new_secret
         item.created_at = datetime.utcnow()
-        item.expired_at = datetime.utcnow() + timedelta(seconds=30)
+        item.expired_at = datetime.utcnow() + timedelta(minutes=10)
 
         logger.info(f"{option.capitalize()} rotated with new secret for: {name}")
 

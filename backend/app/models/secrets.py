@@ -12,7 +12,7 @@ class SecretsModel(Base):
     value = Column(String(1024))
     environment = Column(String(4), default="dev")
     created_at = Column(DateTime, default=datetime.utcnow)
-    expired_at = Column(DateTime, default=lambda: datetime.utcnow() + timedelta(seconds=10))
+    expired_at = Column(DateTime, default=lambda: datetime.utcnow() + timedelta(days=1))
 
     owner_id = Column(Integer, ForeignKey("users_table.id"))
     owner = relationship("UserModel", back_populates="secrets")

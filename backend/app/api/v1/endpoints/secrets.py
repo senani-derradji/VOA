@@ -35,6 +35,7 @@ def create_secret(
             raise HTTPException(status_code=400, detail="Secret limit reached")
 
     encrypted_value = encrypt(value)
+    logger.warning(f"Secret_AFTER_ENCRYPT : {encrypted_value}")
     new_secret = Secret(
         name=name,
         value=encrypted_value,
