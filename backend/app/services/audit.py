@@ -17,9 +17,6 @@ def log_action(db: Session, user_id: int, action: Action):
             .order_by(AUD.id.desc())
             .first()
         )
-        print("LAST ENTRY: ________________",last_entry)
-
-        # previous_hash = last_entry.integrity_checks if last_entry else "0"
 
         if last_entry:
             previous_hash = last_entry.integrity_checks

@@ -16,19 +16,28 @@ def verify(db: Session):
         logger.warning("No logs <= 2")
         return False
 
-    for i in range(len(logs) - 1):
+    for i in range(len(logs)):
+        log = logs[i]
+        if i == 0:
+            continue
+        if not log.integrity_checks:
+            continue
+        previous_log = logs[i - 1]
+
         try:
-            log = logs[i]
-            next_log = logs[i + 1]
-            previous_hash = log.integrity_checks if log.integrity_checks else "0"
-            data = f"{str(previous_hash)}:{str(log.user_id)}:{log.action}"
+            previous_hash = previous_log.integrity_checks
+            data = f"{previous_hash}:{log.user_id}:{log.action}"
             check = sha256(data.encode()).hexdigest()
-            if check != next_log.integrity_checks:
+
+            if check != log.integrity_checks:
                 logger.warning(f"Integrity broken at log ID {log.id}")
                 return False
+            else:
+                logger.info(f"Integrity check passed at log ID {log.id}")
         except Exception as e:
             logger.error(f"Integrity check failed: {e}")
             return False
 
     logger.info("Integrity check passed")
+
     return True

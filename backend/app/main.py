@@ -109,7 +109,7 @@ async def ttl_background_task():
         check_TTL(db, UserModel, "user")
         verify(db)
         db.close()
-        await asyncio.sleep(20)
+        await asyncio.sleep(5)
 
 
 @app.on_event("startup")
