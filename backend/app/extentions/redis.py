@@ -2,21 +2,22 @@ from redis import Redis
 import os, json
 from datetime import datetime
 from app.utils.logging_logs import get_logger
+from app.core.config import settings
+
 
 logger = get_logger(__name__)
 
-REDIS_ENABLED = os.getenv("ENABLE_REDIS", "false").lower() == "true"
-print(REDIS_ENABLED)
+REDIS_ENABLED = settings.get("ENABLE_REDIS", "false").lower() == "true"
 
 redis_instance = None
 
 if REDIS_ENABLED:
     try:
         redis_instance = Redis(
-            host=os.getenv("REDIS_HOST", "redis"),
-            port=int(os.getenv("REDIS_PORT", 6379)),
-            db=0,
-            password=os.getenv("REDIS_PASSWORD", ""),
+            host=settings.get("REDIS_HOST", "redis"),
+            port=int(settings.get("REDIS_PORT", "6379")),
+            db=settings.get("REDIS_DB", "0"),
+            password=settings.get("REDIS_PASSWORD", "password"),
             decode_responses=True
         )
         if redis_instance.ping():

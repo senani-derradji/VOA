@@ -293,7 +293,6 @@ def backup(path):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d")
         cmd = os.system(f"docker exec -t voa-db pg_dump -U {DB_USER} -d {DB_NAME} > {path}/backup.sql")
         os.system(f"docker exec -t voa-db pg_dump -U {DB_USER} -d {DB_NAME} -F c -f /tmp/backup.dump && docker cp voa-db:/tmp/backup.dump {path}\\backup.dump")
-        print(cmd)
         click.echo(click.style(f"Backup saved to {path}/{timestamp}_backup.sql",fg="green"))
     else: click.echo(click.style("Path does not exist.",fg="red"))
 

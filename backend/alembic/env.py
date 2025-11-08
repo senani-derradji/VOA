@@ -7,15 +7,16 @@ config = context.config
 
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 from app.extentions.database import Base
+from app.core.config import settings
+# Load values securely from encrypted settings
+use_sqlite = settings.get("USE_SQLITE", "false").lower() == "true"
+sqlite_path = settings.get("DB_PATH", "./VOA.db")
 
-db_user = os.getenv("DB_USER", "postgres")
-db_pass = os.getenv("DB_PASSWORD", "postgres")
-db_host = os.getenv("DB_HOST", "database")
-db_port = os.getenv("DB_PORT", "5432")
-db_name = os.getenv("DB_NAME", "VOA")
-
-use_sqlite = os.getenv("USE_SQLITE", "false").lower() == "true"
-sqlite_path = os.getenv("DB_PATH", "./VOA.db")
+db_user = settings.get("DB_USER", "postgres")
+db_pass = settings.get("DB_PASSWORD", "postgres")
+db_host = settings.get("DB_HOST", "database")
+db_port = settings.get("DB_PORT", "5432")
+db_name = settings.get("DB_NAME", "VOA")
 
 if use_sqlite:
     database_url = f"sqlite:///{sqlite_path}"

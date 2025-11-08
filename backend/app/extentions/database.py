@@ -13,10 +13,10 @@ from app.utils.logging_logs import get_logger
 
 logger = get_logger(__name__)
 
-DATABASE_FULL = settings.DATABASE_URL.lower() != "false"
-DATABASE_LITE = settings.DATABASE_LITE.lower() != "false"
+DATABASE_FULL = settings.get("DATABASE_URL", "false").lower() != "false"
+DATABASE_LITE = settings.get("USE_SQLITE", "false").lower() != "false"
 
-sqlite_path = os.getenv("DB_PATH", "./VOA.db")
+sqlite_path = settings.get("DB_PATH", "./VOA.db")
 
 if DATABASE_LITE:
     logger.info("Using SQLite lite database")

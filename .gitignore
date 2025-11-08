@@ -12,7 +12,6 @@ env.yaml
 .*env
 
 
-
 # Python cache and compiled files
 __pycache__/
 *.py[cod]

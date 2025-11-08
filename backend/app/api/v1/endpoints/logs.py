@@ -16,7 +16,7 @@ def read_logs(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    if admin_required(current_user, "read_logs"):
+    if not admin_required(current_user, "read_logs"):
         pass
 
     logs = db.query(AuditModel).all()

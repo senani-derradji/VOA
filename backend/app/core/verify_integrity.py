@@ -32,8 +32,6 @@ def verify(db: Session):
             if check != log.integrity_checks:
                 logger.warning(f"Integrity broken at log ID {log.id}")
                 return False
-            else:
-                logger.info(f"Integrity check passed at log ID {log.id}")
         except Exception as e:
             logger.error(f"Integrity check failed: {e}")
             return False

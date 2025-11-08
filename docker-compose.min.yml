@@ -1,4 +1,22 @@
 services:
+  kek_server:
+    build: ./UTILS/KEK
+    image: voa_kek_server:latest
+    container_name: voa_kek_server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:5555/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      SECRET_AUTH: ${SECRET_AUTH}
+    ports:
+      - 5555:5555
+    networks:
+      - keknet
+
+
   backend:
     build: ./backend
     image: voa-backend:latest
@@ -9,16 +27,22 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-    restart: always
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/health || exit 1"]
       interval: 1m30s
-      timeout: 30s
+      timeout: 60s
       retries: 5
-      start_period: 40s
+      start_period: 60s
+    environment:
+      SECRET_AUTH: ${SECRET_AUTH}
+      KEK_SERVER: ${KEK_SERVER}
+
     networks:
       - backnet
       - frontnet
+      - keknet
+
 
   nginx:
     image: nginx:alpine
@@ -44,3 +68,6 @@ networks:
     driver: bridge
   backnet:
     driver: bridge
+  keknet:
+    driver: bridge
+

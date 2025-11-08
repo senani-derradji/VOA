@@ -9,15 +9,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from app.utils.logging_logs import get_logger
 from app.core.config import settings, backend_dir
-# sys.path.append(backend_dir)
-
-
+from app.core.keys.kek_manager import get_kek
 
 logger = get_logger(__name__)
 
-SECRET_KEY = settings.SECRET_KEY
-ENV_ENC_KEYS = ".env.enckeys"
-print(SECRET_KEY)
+SECRET_KEY = settings.get("SECRET_KEY")
+# ENV_ENC_KEYS = ".env.enckeys"
 password = SECRET_KEY.encode()
 
 DATA_CRYPT_PASS = {
@@ -37,39 +34,26 @@ kdf = PBKDF2HMAC(
 key_bytes = kdf.derive(password)
 fernet_key = base64.urlsafe_b64encode(key_bytes)
 
-try :
-    with open(f"{backend_dir}/app/core/keys/DEK_KEYS.key","r") as key:
-        key_01 = key.readline().strip()
-        key_02 = key.readline().strip()
-except NameError as e:
-    logger.error(f"ERROR IN ENCRYPTION KEYS:{e}")
-    exit()
+kek = get_kek() if not None else ""
+if not kek:
+    raise ValueError("KEK is missing or invalid.")
 
-KEY_FILE_ENC =f"{backend_dir}/{ENV_ENC_KEYS}"
-if not os.path.exists(KEY_FILE_ENC):
-    with open(KEY_FILE_ENC,"w") as key_encryption:
-        f = Fernet(key_01)
-        for key, value in DATA_CRYPT_PASS.items():
-            key_encryption.write(f"{key}DERRADJI{f.encrypt(str(value).encode()).decode()}\n")
+f_kek = Fernet(kek)
 
-with open(KEY_FILE_ENC,"r") as key_decryption:
-    DATA_DECRYPT_PASS = {}
-    for line in key_decryption.readlines():
-        f = Fernet(key_01)
-        try:
-            key, value = line.strip().split("DERRADJI")
-            DATA_DECRYPT_PASS[key] = f.decrypt(value.encode()).decode()
-        except Exception as e:
-            logger.error(f"ERROR IN DECRYPTION KEYS: {e}")
+try:
+    with open(f"{backend_dir}/app/core/keys/DEK_KEY_1.key.enc","rb") as key_file_1:
+        key_01 = f_kek.decrypt(key_file_1.read())
 
+    with open(f"{backend_dir}/app/core/keys/DEK_KEY_2.key.enc", "rb") as key_file_2:
+        key_02 = f_kek.decrypt(key_file_2.read())
 
-for key, value in DATA_DECRYPT_PASS.items():
-    print(f"{key}: {value}")
+except Exception as e:
+    logger.error(f"ERROR IN KEK: {key_01}")
+
 
 logger.info(f"Fernet key: {key_01}")
 
 fernet = Fernet(key_01)
-
 
 def encrypt(value: str) -> str:
     try:

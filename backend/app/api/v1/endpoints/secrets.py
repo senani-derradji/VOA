@@ -24,13 +24,13 @@ def create_secret(
     env = data_form.environment
     value = data_form.value
 
-    if db.query(Secret).filter_by(name=name).first() and db.query(Secret).filter_by(environment=env).first():
+    if db.query(Secret).filter_by(name=name).first():
         logger.warning(f"Secret name already exists - {name}")
         raise HTTPException(status_code=400, detail="Secret name already exists")
 
     if current_user.role != "admin":
         user_secret_count = db.query(Secret).filter_by(owner_id=current_user.id).count()
-        if user_secret_count >= 100:
+        if user_secret_count >= 10:
             logger.warning(f"Secret limit reached for user {current_user.id}")
             raise HTTPException(status_code=400, detail="Secret limit reached")
 

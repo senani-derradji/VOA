@@ -3,10 +3,14 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from app.core.config import settings
+from app.utils.logging_logs import get_logger
 
-SEC_KEY = settings.SECRET_KEY
-ALGORITHM = settings.ALGORITHM
-ACCESS_TOKEN_EXPIRE_MINUTES = int(f"{settings.ACCESS_TOKEN_EXPIRE_MINUTES}")
+logger = get_logger(__name__)
+
+
+SEC_KEY = settings.get("SECRET_KEY")
+ALGORITHM = settings.get("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(f"{settings.get('ACCESS_TOKEN_EXPIRE_MINUTES')}")
 
 pwd_context = CryptContext(
     schemes=["pbkdf2_sha256"],
@@ -39,8 +43,7 @@ def create_refresh_token(data: dict, expires_delta: timedelta = timedelta(days=7
 def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SEC_KEY, algorithms=[ALGORITHM])
-        print("Decoded token payload:", payload)
         return payload
     except JWTError:
-        print("Invalid token")
+        logger.error("Invalid access token")
         return None

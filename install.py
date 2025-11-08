@@ -1,21 +1,24 @@
+import os
+import time
+import requests
 from pathlib import Path
 from cryptography.fernet import Fernet
-import os
 
 USE_SQLITE = True
 ENABLE_REDIS = False
+ENV_FILE_NAME = '.env.encrypted'
 
 BASE_DIR = Path.cwd()
-ENV_FILE_NAME = ".env.encrypted"
-
 PATHS = {
     "BACKEND": BASE_DIR / "backend",
-    "CLI": BASE_DIR / "cli",
-    "HERE": BASE_DIR
+    "CLI": BASE_DIR / "cli"
 }
 
-KEY_PATH = PATHS["BACKEND"] / "app/core/keys"
+KEY_PATH = PATHS["BACKEND"] / "app" / "core" / "keys"
 KEY_PATH.mkdir(parents=True, exist_ok=True)
+
+dek1_path = KEY_PATH / "DEK_KEY_1.key.enc"
+dek2_path = KEY_PATH / "DEK_KEY_2.key.enc"
 
 DATA = {
     "USE_SQLITE": str(USE_SQLITE).lower(),
@@ -37,25 +40,46 @@ DATA = {
     "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
 }
 
-key_file_path = KEY_PATH / "DEK_KEYS.key"
-if not key_file_path.exists():
-    key_01 = Fernet.generate_key()
-    key_02 = Fernet.generate_key()
-    with open(key_file_path, "wb") as key_file:
-        key_file.write(key_01 + b"\n" + key_02)
-else:
-    with open(key_file_path, "rb") as key_file:
-        key_01 = key_file.readline().strip()
-        key_02 = key_file.readline().strip()
+print("[*] Starting KEK server container...")
+os.system("docker compose -f docker-compose.min.yml up -d kek_server --build")
 
+print("[*] Waiting for KEK server to be ready...")
+for i in range(10):
+    try:
+        r = requests.get(
+            "http://127.0.0.1:5555/get_kek",
+            headers={"Authorization": "Bearer derradji_kek_token"},
+            timeout=2,
+            verify=False
+        )
+        if r.status_code == 200:
+            kek = r.json()["kek"]
+            print("[+] KEK server is ready.")
+    except requests.exceptions.RequestException:
+        time.sleep(5)
+
+kek_fernet = Fernet(kek.encode())
+
+print("======= kek ======= : ", kek)
+kek_host = "KEK_HOST_FILE.key"
+with open(kek_host, "w") as f: f.write(f"{time.time()} : {kek}")
+
+dek1_plain = Fernet.generate_key()
+with open(dek1_path, "wb") as f: f.write(kek_fernet.encrypt(dek1_plain))
+enc_dek1 = dek1_path.read_bytes()
+key_01 = kek_fernet.decrypt(enc_dek1)
 f_1 = Fernet(key_01)
-f_2 = Fernet(key_02)
 
+# KEY 2 -----------------------------------------
+# dek2_plain = Fernet.generate_key()
+# with open(dek2_path, "wb") as f: f.write(kek_fernet.encrypt(dek2_plain))
+# enc_dek2 = dek2_path.read_bytes()
+# key_02 = kek_fernet.decrypt(enc_dek2)
+# f_2 = Fernet(key_02)
 
 for name, path in PATHS.items():
     path.mkdir(parents=True, exist_ok=True)
     env_path = path / ENV_FILE_NAME
-
     try:
         with env_path.open("w", encoding="utf-8") as file:
             for key, value in DATA.items():
@@ -65,15 +89,10 @@ for name, path in PATHS.items():
         print(f"[+] {env_path} created successfully.")
     except Exception as e:
         print(f"[!] Failed to create {env_path}: {e}")
+        exit()
 
-try:
-    with env_path.open("r") as file:
-        for line in file:
-            if "DERRADJI" in line:
-                enc_key, enc_value = line.strip().split("DERRADJI", 1)
 
-                dec_key = f_1.decrypt(enc_key.encode()).decode()
-                dec_value = f_1.decrypt(enc_value.encode()).decode()
-                print(f"{dec_key}={dec_value}")
-except Exception as e:
-    print(f"[!] Failed to decrypt {env_path}: {e}")
+print("WAIT ....")
+time.sleep(10)
+os.system(f"cd {BASE_DIR} && docker compose -f docker-compose.min.yml up -d backend nginx")
+
