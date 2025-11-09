@@ -23,7 +23,7 @@ kek = load_or_generate_kek()
 def rotate_kek_periodically():
     global kek
     while True:
-        time.sleep(60)
+        time.sleep(3600)
         with kek_lock:
             kek = Fernet.generate_key()
             KEY_FILE.write_bytes(kek)

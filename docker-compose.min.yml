@@ -16,9 +16,6 @@ services:
     networks:
       - keknet
 
-  dek_server:
-  
-
   backend:
     build: ./backend
     image: voa-backend:latest

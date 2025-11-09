@@ -2,6 +2,23 @@
 
 
 services:
+  kek_server:
+    build: ./UTILS/KEK
+    image: voa_kek_server:latest
+    container_name: voa_kek_server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:5555/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      SECRET_AUTH: ${SECRET_AUTH}
+    ports:
+      - 5555:5555
+    networks:
+      - keknet
+
   database:
     image: postgres:16
     container_name: voa-db
@@ -63,6 +80,10 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      SECRET_AUTH: ${SECRET_AUTH}
+      KEK_SERVER: ${KEK_SERVER}
+      REDIS_ADDR: ${REDIS_ADDR}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - ./backend:/app
     depends_on:
@@ -80,6 +101,7 @@ services:
     networks:
       - backnet
       - frontnet
+      - keknet
 
   nginx:
     image: nginx:alpine
@@ -188,6 +210,9 @@ networks:
     driver: bridge
   monitoring:
     driver: bridge
+  keknet:
+    driver: bridge
+
 
 volumes:
   pgdata:
