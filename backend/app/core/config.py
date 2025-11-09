@@ -26,14 +26,14 @@ except Exception as e:
     sys.exit(1)
 
 try:
-    with open(f"{backend_dir}/app/core/keys/DEK_KEY_1.key.enc", "rb") as key_file_1:
+    with open(f"{backend_dir}/app/core/keys/dek.key.enc", "rb") as key_file_1:
         key_01 = f_kek.decrypt(key_file_1.read())
 except Exception as e:
-    logger.error(f"ERROR IN DEK_KEY_1: {e}")
+    logger.error(f"ERROR IN dek.key: {e}")
     key_01 = None
 
 if not key_01:
-    raise RuntimeError("DEK_KEY_1 could not be decrypted.")
+    raise RuntimeError("dek.key could not be decrypted.")
 
 class Settings:
     def __init__(self, env_path, dek):

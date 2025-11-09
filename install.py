@@ -13,7 +13,7 @@ PATHS = {"BACKEND": BASE_DIR / "backend"}
 KEY_PATH = PATHS["BACKEND"] / "app" / "core" / "keys"
 KEY_PATH.mkdir(parents=True, exist_ok=True)
 
-dek1_path = KEY_PATH / "DEK_KEY_1.key.enc"
+dek1_path = KEY_PATH / "dek.key.enc"
 
 DATA = {
     "USE_SQLITE": str(USE_SQLITE).lower(),
@@ -73,7 +73,7 @@ def main():
     compose_file = "docker-compose.full.yml" if use_full_compose else "docker-compose.min.yml"
 
     print("[*] Starting KEK server container...")
-    start_container(compose_file, service_name="kek_server", build=True)
+    start_container(compose_file, service_name="kek_server", build=False)
 
     load_dotenv()
     AUTH = os.getenv("SECRET_AUTH")

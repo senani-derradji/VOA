@@ -85,7 +85,7 @@ def get_secret(
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
 
-    if not admin_required(current_user, f"get_secret_{secret.name}") and secret.owner_id != current_user.id:
+    if not admin_required(current_user, f"get_secret_{secret.name}"):
         raise HTTPException(status_code=403, detail="Not authorized to view this secret")
 
     latest_version = (
@@ -118,7 +118,7 @@ def get_secret_versions(
     if not secret:
         raise HTTPException(status_code=404, detail="Secret not found")
 
-    if not admin_required(current_user, f"get_secret_versions_{secret.name}") and secret.owner_id != current_user.id:
+    if not admin_required(current_user, f"get_secret_versions_{secret.name}"):
         raise HTTPException(status_code=403, detail="Not authorized")
 
     versions = (db.query(SecretVersion).filter_by(secret_id=secret.id).order_by(SecretVersion.version_number.desc()).all())

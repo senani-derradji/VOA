@@ -7,7 +7,7 @@ COPY kek_server.py .
 
 RUN apk add openssl
 RUN openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=localhost"
-RUN pip install --no-cache-dir flask cryptography
+RUN pip install --no-cache-dir flask cryptography requests
 
 RUN chown -R kek:appkek /app
 USER kek

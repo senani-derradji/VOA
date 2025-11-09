@@ -41,10 +41,10 @@ if not kek:
 f_kek = Fernet(kek)
 
 try:
-    with open(f"{backend_dir}/app/core/keys/DEK_KEY_1.key.enc","rb") as key_file_1:
+    with open(f"{backend_dir}/app/core/keys/dek.key.enc","rb") as key_file_1:
         key_01 = f_kek.decrypt(key_file_1.read())
 
-    # with open(f"{backend_dir}/app/core/keys/DEK_KEY_2.key.enc", "rb") as key_file_2:
+    # with open(f"{backend_dir}/app/core/keys/dek.key.enc", "rb") as key_file_2:
     #     key_02 = f_kek.decrypt(key_file_2.read())
 
 except Exception as e:
