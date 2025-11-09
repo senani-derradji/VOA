@@ -1,4 +1,4 @@
-import requests, os #, ctypes
+import requests, os
 from app.utils.logging_logs import get_logger
 
 logger = get_logger(__name__)
@@ -20,3 +20,4 @@ def get_kek():
     except Exception as e:
         logger.error("ERROR IN KEK MANAGER :",e)
         exit()
+

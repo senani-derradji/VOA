@@ -1,6 +1,5 @@
-import os
-import time
-import requests
+import os, time, requests
+from dotenv import load_dotenv
 from pathlib import Path
 from cryptography.fernet import Fernet
 
@@ -11,7 +10,7 @@ ENV_FILE_NAME = '.env.encrypted'
 BASE_DIR = Path.cwd()
 PATHS = {
     "BACKEND": BASE_DIR / "backend",
-    "CLI": BASE_DIR / "cli"
+    # "CLI": BASE_DIR / "cli"
 }
 
 KEY_PATH = PATHS["BACKEND"] / "app" / "core" / "keys"
@@ -44,23 +43,30 @@ print("[*] Starting KEK server container...")
 os.system("docker compose -f docker-compose.min.yml up -d kek_server --build")
 
 print("[*] Waiting for KEK server to be ready...")
+load_dotenv()
+AUTH=os.getenv("SECRET_AUTH")
+print(AUTH)
 for i in range(10):
     try:
         r = requests.get(
-            "http://127.0.0.1:5555/get_kek",
-            headers={"Authorization": "Bearer derradji_kek_token"},
-            timeout=2,
+            "https://127.0.0.1:5555/get_kek",
+            headers={"Authorization": f"Bearer {AUTH}"},
+            timeout=1,
             verify=False
         )
+
         if r.status_code == 200:
             kek = r.json()["kek"]
             print("[+] KEK server is ready.")
     except requests.exceptions.RequestException:
-        time.sleep(5)
+        print("[*] KEK server is not ready yet...")
+        time.sleep(2)
+
+print("======= kek =======")
+print(kek)
+print("===================")
 
 kek_fernet = Fernet(kek.encode())
-
-print("======= kek ======= : ", kek)
 kek_host = "KEK_HOST_FILE.key"
 with open(kek_host, "w") as f: f.write(f"{time.time()} : {kek}")
 
@@ -91,8 +97,6 @@ for name, path in PATHS.items():
         print(f"[!] Failed to create {env_path}: {e}")
         exit()
 
-
 print("WAIT ....")
 time.sleep(10)
 os.system(f"cd {BASE_DIR} && docker compose -f docker-compose.min.yml up -d backend nginx")
-

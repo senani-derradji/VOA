@@ -105,11 +105,10 @@ async def ttl_background_task():
     while True:
         db: Session = SessionLocal()
         check_TTL(db, SecretsModel, "secret")
-
         check_TTL(db, UserModel, "user")
         verify(db)
         db.close()
-        await asyncio.sleep(5)
+        await asyncio.sleep(30)
 
 
 @app.on_event("startup")

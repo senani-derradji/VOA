@@ -19,8 +19,7 @@ ENV_FILE_NAME = ".env.encrypted"
 
 try:
     kek = get_kek() if not None else ""
-    if not kek:
-        raise ValueError("KEK is missing or invalid.")
+    if not kek: raise ValueError("KEK is missing or invalid.")
     f_kek = Fernet(kek)
 except Exception as e:
     logger.error(f"ERROR IN KEK: {e}")

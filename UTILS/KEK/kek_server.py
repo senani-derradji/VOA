@@ -1,43 +1,49 @@
 from flask import Flask, jsonify, request
 from cryptography.fernet import Fernet
 from pathlib import Path
-import os
+import os, time, threading
 
 app = Flask(__name__)
 
 KEY_FILE = Path("kek_store.key")
 AUTH_NAME = "SECRET_AUTH"
 AUTH_TOKEN = os.getenv(AUTH_NAME)
+kek_lock = threading.Lock()
 
-if KEY_FILE.exists():
-    kek = KEY_FILE.read_bytes()
-else:
-    kek = Fernet.generate_key()
-    KEY_FILE.write_bytes(kek)
+def load_or_generate_kek():
+    if KEY_FILE.exists():
+        return KEY_FILE.read_bytes()
+    else:
+        new_kek = Fernet.generate_key()
+        KEY_FILE.write_bytes(new_kek)
+        return new_kek
 
-# kek_served = False
+kek = load_or_generate_kek()
+
+def rotate_kek_periodically():
+    global kek
+    while True:
+        time.sleep(60)
+        with kek_lock:
+            kek = Fernet.generate_key()
+            KEY_FILE.write_bytes(kek)
+            print("[*] KEK rotated.")
+        # FOR TESTING
+        with open("KEK_HOST_FILE.key", "w") as f: f.write(f"{time.time()} : {kek.decode()}")
+
+threading.Thread(target=rotate_kek_periodically, daemon=True).start()
 
 @app.route("/get_kek", methods=["GET"])
 def get_kek():
-    # global kek_served
     token = request.headers.get("Authorization", "")
-    if token != f"Bearer {AUTH_TOKEN}":
-        return jsonify({"error": "Unauthorized"}), 401
+    if token != f"Bearer {AUTH_TOKEN}": return jsonify({"error": "Unauthorized"}), 401
 
-    # if kek_served:
-    #     return jsonify({"error": "KEK already accessed"}), 403
+    with kek_lock: current_kek = kek
 
-    # kek_served = True
-    if KEY_FILE.exists():
-        KEY_FILE.unlink()
-    if AUTH_NAME in os.environ:
-        del os.environ[AUTH_NAME]
-
-    return jsonify({"kek": kek.decode()})
+    return jsonify({"kek": current_kek.decode()})
 
 @app.route("/health", methods=["GET"])
-def health_check():
-    return jsonify({"status": "OK"}), 200
+def health_check(): return jsonify({"status": "OK"}), 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5555)
+    app.run(host="0.0.0.0", port=5555, ssl_context=("cert.pem", "key.pem"))

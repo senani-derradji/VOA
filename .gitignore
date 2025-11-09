@@ -88,6 +88,10 @@ app/static/dist/
 *.pem
 *.crt
 *.key
+*.pfx
+*.p12
+*.enc
+*.encrypted
 
 # ---------------------------
 # 🚀 Deployment / Docker

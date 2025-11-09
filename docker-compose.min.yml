@@ -16,6 +16,8 @@ services:
     networks:
       - keknet
 
+  dek_server:
+  
 
   backend:
     build: ./backend
@@ -42,7 +44,6 @@ services:
       - backnet
       - frontnet
       - keknet
-
 
   nginx:
     image: nginx:alpine
