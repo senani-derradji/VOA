@@ -1,146 +1,81 @@
-# VOA Secrets Manager
+# 🔐 VOA — Vaulity Ops API  
+### Secure Secrets Management Platform with RBAC, TTL, Encryption Rotation, and Observability
 
-A full-stack secrets management project including API backend, CLI tool, and monitoring infrastructure. Built with **FastAPI**, **Docker**, **PostgreSQL**, **Redis**, **Prometheus**, **Grafana**, and **Nginx**.
-
----
-
-## Table of Contents
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Docker Deployment](#docker-deployment)
-- [Backend API](#backend-api)
-- [CLI Tool](#cli-tool)
-- [Infrastructure](#infrastructure)
-- [Environment Variables](#environment-variables)
-- [Hosts File](#hosts-file)
-- [License](#license)
-
----
-[![VOA Demo](https://img.youtube.com/vi/XALXbmzHZMM/hqdefault.jpg)](https://youtu.be/XALXbmzHZMM?si=302Gt9Zp2pOI4pcl)
----
-
-## Project Structure
-
-```
-secrets-manager-api/
-├─ backend/         # FastAPI backend (click here to see [README](backend/README.md))
-├─ cli/             # VOA CLI tool (click here to see [README](cli/README.md))
-├─ infrastructure/  # Monitoring & services configuration
-│  ├─ grafana/
-│  ├─ nginx/
-│  ├─ prometheus/
-│  └─ redis/
-├─ docker-compose.yml
-├─ install.py       # Script to generate .env files and check the Dependencies
-└─ LICENSE
-```
-
-> Clicking on `backend` or `cli` folders in most GitHub interfaces will redirect to their respective `README.md` files.
+![GitHub last commit](https://img.shields.io/github/last-commit/senani-derradji/VOA)
+![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-success)
+![Docker](https://img.shields.io/badge/Docker-Compose-important)
+![License](https://img.shields.io/github/license/senani-derradji/VOA)
 
 ---
 
-## Installation
+## 🧩 Overview
 
-1. Clone the repository:
+**VOA (Vaulity Ops API)** is a **secure secrets manager** built with **FastAPI** that provides encryption, rotation, access control, and observability features for managing application secrets and credentials.
+
+It supports **RBAC (Role-Based Access Control)**, **JWT authentication**, **TTL expiration for secrets**, **audit logging with integrity checks**, and **automatic key rotation (KEK/DEK)**.
+
+VOA can run in two modes:
+- 🟢 **Mini**: Lightweight version with SQLite and minimal services.
+- 🧱 **Full**: Production-ready stack with PostgreSQL, Redis, Prometheus, and Grafana.
+
+---
+
+## 🧠 Core Concepts
+
+| Component | Description |
+|------------|-------------|
+| **KEK (Key Encryption Key)** | Managed by a dedicated `kek_server` container. It encrypts the DEK for the backend. |
+| **DEK (Data Encryption Key)** | Used to encrypt/decrypt secrets in the database. Automatically rotated every 12 hours. |
+| **RBAC System** | Supports roles: `Admin`, `Developer`, and `CEO`, each with specific permissions. |
+| **JWT Authentication** | Login/Refresh tokens for user authentication. |
+| **Secrets CRUD + Versioning** | Create, read, update, delete secrets with version history and TTL expiration. |
+| **TTL System** | Background task checks for expired users/secrets and removes them automatically. |
+| **Audit Log + Integrity Chain** | Every action is hashed and linked to ensure tamper-proof audit trails. |
+| **Monitoring Stack** | Prometheus exporters and Grafana dashboards (in full mode). |
+| **Nginx Reverse Proxy** | Manages frontend/backend routing and SSL termination. |
+
+---
+
+## 🚀 Features
+
+### 🛡️ Security
+- AES/Fernet-based encryption
+- Dual-layer KEK/DEK encryption system
+- Automatic DEK rotation every **12 hours**
+- Secure webhook for KEK update
+- JWT + refresh tokens
+- Rate limiting (via `slowapi`)
+
+### 👥 Access Control
+- Role-based permissions (`Admin`, `Developer`, `CEO`)
+- Centralized user and secret management
+
+### ⏰ Lifecycle Management
+- Background **TTL checks** for users/secrets
+- Versioning of secrets
+- Automated cleanup
+
+### 🧾 Audit & Integrity
+- Logging of all critical actions
+- Tamper-proof chain using hash linking (mini blockchain)
+- Exportable audit trails
+
+### 📊 Observability (Full Mode)
+- Prometheus metrics via `prometheus_fastapi_instrumentator`
+- Redis caching layer
+- Grafana dashboards with preconfigured exporters
+
+---
+
+## 🐳 Deployment
+
+### 🟢 Mini Mode (Local or Development)
+
+Includes:
+> KEK Server, Backend (FastAPI), SQLite, NGINX (n) / FullMode (y)
+
 ```bash
-git clone https://github.com/senani-derradji/VOA && cd VOA
-```
-
-2. Run the installer to create `.env` files:
-```bash
-python install.py
-```
-
-3. Check and update `.env` files in `backend/` and `cli/` if needed.
-
----
-
-## Hosts File
-
-Make sure to update your system's hosts file to map the local domain:
-
-```
-127.0.0.1 voa.local
-```
-
-This ensures Nginx reverse proxy and local services work correctly.
-
----
-
-## Docker Deployment
-
-1. Build and start all services using Docker Compose:
-```bash
-docker-compose up -d --build
-```
-
-2. Services included:
-- **PostgreSQL**: `voa-db`
-- **Redis**: `voa-redis`
-- **Backend API**: `voa-backend`
-- **Nginx**: `voa-nginx`
-- **Prometheus**: `voa-prometheus`
-- **Grafana**: `voa-grafana`
-- **Exporters**: `postgres-exporter`, `redis-exporter`, `nginx-exporter`
-
-3. Access points:
-- FastAPI backend: `http://localhost:8000`
-- Nginx: `http://localhost`
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3030`
-
----
-
-## Backend API
-
-The backend is located in the `backend/` folder. See [backend README](backend/README.md) for details on:
-- API endpoints
-- Running locally
-- Docker setup
-- Database initialization
-- Testing
-
----
-
-## CLI Tool
-```bash
-pip install dvoa-cli
-```
-
-The CLI tool is located in the `cli/` folder. See [CLI README](cli/README.md) for details on:
-- Commands
-- Authentication
-- Usage examples
-
----
-
-## Infrastructure
-
-Configured services for monitoring, caching, and reverse proxy:
-
-- **PostgreSQL** for database
-- **Redis** for caching and rate limiting
-- **Nginx** as reverse proxy
-- **Prometheus** for metrics
-- **Grafana** for dashboards
-- **Exporters** for PostgreSQL, Redis, Nginx
-
-Configuration files are located in `infrastructure/` subfolders.
-
----
-
-## Environment Variables
-
-The `install.py` script generates `.env` files with default values:
-
-```
-**** UPDATE IS COMING SOON ****
-```
-
-Update these values before deploying to production.
-
----
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+# Clone the repo
+git clone https://github.com/senani-derradji/VOA.git
+cd VOA && py install.py
